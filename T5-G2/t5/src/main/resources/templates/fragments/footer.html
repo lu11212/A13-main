@@ -1,0 +1,49 @@
+<div th:fragment="footer">
+	<!-- SCRIPTS-->
+	<script
+		th:src="@{/t5/jquery/jquery-3.7.0.com.js}"
+		th:inline="javascript"
+	></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+		crossorigin="anonymous"
+	></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+		integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+		crossorigin="anonymous"
+	></script>
+
+	<script th:src="@{/t5/js/UserUtil.js}" th:inline="javascript"></script>
+
+	<script th:src="@{/t5/js/notification.js}" th:inline="javascript"></script>
+
+	<script th:src="@{/t5/js/language.js}" th:inline="javascript"></script>
+
+	<script th:inline="javascript">
+		// nome internazionale per la modalità
+		function get_mode_text(mode) {
+			let mode_text;
+			// Supponiamo di avere una variabile `mode` che determina il caso da attivare
+			switch (mode) {
+				case "Sfida":
+					mode_text = /*[[#{modalità_sfida}]]*/ "";
+					break;
+				case "Allenamento":
+					mode_text = /*[[#{modalità_allenamento}]]*/ "";
+					break;
+				case "Scalata":
+					mode_text = /*[[#{modalità_scalata}]]*/ "";
+					break;
+				case "PartitaSingola":
+					mode_text = /*[[#{modalità_partita_singola}]]*/ "";
+					break;
+				default:
+					mode_text = "Modalità Sconosciuta";
+			}
+
+			return mode_text;
+		}
+	</script>
+</div>

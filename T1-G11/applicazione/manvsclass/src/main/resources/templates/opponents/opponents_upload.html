@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title th:text="#{uploadRobots_page_title}">Upload Robot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link th:href="@{https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css}" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f7f6;
+            margin-top: 20px;
+        }
+        .file_manager .file {
+            position: relative;
+            border-radius: .55rem;
+            overflow: hidden;
+            padding: 0 !important;
+        }
+        .file_manager .file .icon {
+            text-align: center;
+            padding: 15px 10px;
+        }
+        .file_manager .file .icon i {
+            font-size: 30px;
+            color: #777;
+        }
+        .card {
+            background: #fff;
+            transition: .5s;
+            border: 0;
+            margin-bottom: 30px;
+            border-radius: .55rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        #loadingOverlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 1050;
+        }
+        #loadingModal {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+<div id="main-content" class="file_manager">
+    <div class="container w-50">
+        <div class="card">
+            <div class="file text-center pt-3">
+                <p class="h3" th:text="#{uploadRobots_title}">Upload Robot</p>
+                <div class="icon my-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="55" height="55" fill="currentColor"
+                         class="bi bi-file-earmark-arrow-up-fill text-success" viewBox="0 0 16 16">
+                        <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zM6.354 9.854a.5.5 0 0 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 8.707V12.5a.5.5 0 0 1-1 0V8.707L6.354 9.854z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="card-body">
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label for="className" th:text="#{uploadRobots_class_name}">Class Name</label>
+                        <input type="text" class="form-control" id="className">
+                    </div>
+                    <div class="form-group">
+                        <label for="date" th:text="#{uploadRobots_date}">Date</label>
+                        <input type="date" class="form-control" id="date">
+                    </div>
+                    <div class="form-group">
+                        <label for="difficulty" th:text="#{uploadRobots_difficulty}">Difficulty</label>
+                        <select class="form-control" id="difficulty" th:title="#{uploadRobots_difficulty_descr}">
+                            <option value="Beginner" th:text="#{difficulty_beginner}">Beginner</option>
+                            <option value="Intermediate" th:text="#{difficulty_intermediate}">Intermediate</option>
+                            <option value="Advanced" th:text="#{difficulty_advanced}">Advanced</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="description" th:text="#{uploadRobots_description}">Description</label>
+                        <textarea class="form-control" id="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="category1" th:text="#{uploadRobots_category_1}">Category 1</label>
+                        <input type="text" class="form-control" id="category1">
+                    </div>
+                    <div class="form-group">
+                        <label for="category2" th:text="#{uploadRobots_category_2}">Category 2</label>
+                        <input type="text" class="form-control" id="category2">
+                    </div>
+                    <div class="form-group">
+                        <label for="category3" th:text="#{uploadRobots_category_3}">Category 3</label>
+                        <input type="text" class="form-control" id="category3">
+                    </div>
+                    <div class="form-group">
+                        <label for="fileInput" th:text="#{uploadRobots_upload_class_text}">Upload Class</label>
+                        <input type="file" class="form-control-file" id="fileInput">
+                    </div>
+                    <div class="form-group">
+                        <label for="zipRobotInput" th:text="#{uploadRobots_upload_robot_text}">Upload Robot</label>
+                        <input type="file" class="form-control-file" id="zipRobotInput">
+                    </div>
+                    <div class="form-group text-center mt-4">
+                        <button type="button" onclick="uploadOpponent()" class="btn btn-success" id="uploadButton" th:text="#{uploadRobots_upload}">Upload</button>
+                        <button type="button" onclick="goBack()" class="btn btn-secondary ml-2" th:text="#{uploadRobots_go_back}">Back</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Schermata di caricamento -->
+        <div id="loadingOverlay">
+            <div id="loadingModal">
+                <p th:text="#{uploadRobots_uploading}"></p>
+            </div>
+        </div>
+        <!--MODIFICA (05/11/2024) messaggio di successo per uploadClasseandTest -->
+        <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="successModalLabel" th:text="#{uploadRobots_success_title}"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" th:text="#{uploadRobots_upload_success}">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onclick="redirectToClass()">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+    </div>
+</div>
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script th:inline="javascript">
+    const uploadRobots_upload_error = /*[[#{uploadRobots_upload_error}]]*/ "Si è verificato un errore durante il caricamento. Controlla i log del server per ulteriori dettagli.";
+    const uploadRobots_choose = /*[[#{uploadRobots_choose}]]*/ "Scegli file";
+    const uploadRobots_no_chosen = /*[[#{uploadRobots_no_chosen}]]*/ "Nessun file scelto";
+    const errors = {
+        notHandled: /*[[#{error.nothandled}]]*/ "Si è verificato un errore, riprova più tardi"
+    };
+</script>
+
+<script th:src="@{/t1/js/utils/endpoints.js}"></script>
+<script th:src="@{/t1/js/utils/api.js}"></script>
+<script th:src="@{/t1/js/utils/cookie_util.js}"></script>
+<script th:src="@{/t1/js/utils/renderErrors.js}"></script>
+
+<script th:src="@{/t1/js/opponents/opponents_upload.js}"></script>
+
+
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", uploadButtonState);
+    document.getElementById('className').addEventListener("input", uploadButtonState);
+    document.getElementById("fileInput").addEventListener("change", uploadButtonState);
+    document.getElementById("zipRobotInput").addEventListener("change", uploadButtonState);
+
+    function uploadButtonState() {
+        const name = document.getElementById('className').value.trim();
+        const fileIsSelected = document.getElementById("fileInput").files.length > 0;
+        const zipIsSelected = document.getElementById("zipRobotInput").files.length > 0;
+        const uploadButton = document.getElementById('uploadButton');
+        if ((name === undefined || name === "") || !fileIsSelected || !zipIsSelected) {
+            uploadButton.setAttribute("disabled", "disabled");
+        } else {
+            uploadButton.removeAttribute("disabled");
+        }
+    }
+
+
+
+    function goBack() {
+        window.history.back();    //MODIFICA (05/11/2024) tasto Go Back
+    }
+
+    function redirectToClass() {
+        window.location.href = VIEWS.OPPONENTS_MAIN;
+    }
+</script>
+</body>
+</html>

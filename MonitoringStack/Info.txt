@@ -1,0 +1,27 @@
+1. Cosa misura Micrometer di default?
+Spring Boot + Micrometer espone un set standard di metriche via /actuator/prometheus 
+quando la dipendenza micrometer-registry-prometheus è inclusa.
+
+Le categorie principali includono:
+
+Categoria	Descrizione	                            Esempio di metrica
+JVM	        Heap, GC, threads, file descriptors	    jvm_memory_used_bytes
+CPU	        Uptime, load avg, process time	        process_cpu_usage
+Garbage     Collector	Durata, frequenza	        jvm_gc_pause_seconds_sum
+Thread	    Count, daemon, state	                jvm_threads_live
+Tomcat	    Connessioni, richieste	                tomcat_sessions_active_current
+HTTP	    Tempi di risposta per rotte	            http_server_requests_seconds_count
+Spring	    Bean, datasource, cache	spring_beans,   spring_data_repository_invocations_total
+
+Spring Boot Application Dashboard
+una dashboard ufficiale pronta per Micrometer Prometheus:
+📎 Dashboard ID: 4701
+📥 Link: https://grafana.com/grafana/dashboards/4701
+
+Mostra: JVM Heap & Non-Heap, GC Pause, Uptime, Request rate / errori HTTP, Threads, Classi caricate
+
+JVM (Micrometer) Dashboard
+📎 Dashboard ID: 8588
+📥 Link: https://grafana.com/grafana/dashboards/8588
+
+Focalizzata su: GC, Heap / Non-Heap usage, Thread states, File descriptors

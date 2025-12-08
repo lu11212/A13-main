@@ -1,0 +1,30 @@
+name: api_gateway
+
+services:
+  api-gateway:
+    image: mick0974/a13:api-gateway
+    container_name: api_gateway-controller
+    depends_on:
+      - redis_cache
+    environment:
+      REDIS_HOST: redis_cache
+      REDIS_PORT: 6379
+    ports:
+      - "8090:8090"
+    networks:
+      - global-network
+  
+  redis_cache:
+    image: redis:latest
+    container_name: redis_cache
+    ports:
+      - "6380:6379"  
+    networks:
+      - global-network  
+
+networks:
+  global-network:
+    external: true  # Usa un network Docker già esistente
+
+volumes:
+  route_db_data:

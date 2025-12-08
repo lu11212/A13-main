@@ -1,0 +1,15 @@
+name: t7
+
+services:
+  app:
+    image: mick0974/a13:t7-g31
+    container_name: t7-controller
+    restart: always
+    expose:
+      - 8087
+    networks:
+      - global-network
+
+networks:
+  global-network:
+    external: true

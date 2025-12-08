@@ -1,0 +1,15 @@
+services:
+  db-backup:
+    image: mick0974/a13:db-backup
+    container_name: db-backup
+    volumes:
+      - Backups:/Backups
+    networks:
+      - global-network
+
+volumes:
+  Backups:
+
+networks:
+  global-network:
+    external: true

@@ -1,0 +1,14 @@
+name: ui_gateway
+
+services:
+  proxy:
+    image: mick0974/a13:ui-gateway
+    container_name: ui_gateway-nginx
+    ports:
+      - "80:80" # Mappa la porta per renderla accessibile al di fuori della rete, expose la rende visibile all'interno della rete
+    networks:
+      - global-network
+
+networks:
+  global-network:
+    external: true

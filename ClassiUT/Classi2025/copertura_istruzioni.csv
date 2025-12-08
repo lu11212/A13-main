@@ -1,0 +1,10 @@
+Categoria,Robot,Copertura istruzioni Facile,Copertura istruzioni Medio,Copertura istruzioni Difficile
+FTPFile,LLM,13%,44%,97%
+FTPFile,Student,,,100%
+FTPFile,EvoSuite,73%,100%,100%
+FTPFile,Randoop,65%,67%,69%
+OutPutFormat,LLM,33%,45%,100%
+OutPutFormat,Student,,,100%
+OutPutFormat,Randoop,89%,, 
+OutPutFormat,EvoSuite,74%,96%,99%
+

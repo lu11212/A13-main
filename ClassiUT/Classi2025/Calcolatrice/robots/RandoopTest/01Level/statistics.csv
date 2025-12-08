@@ -1,0 +1,9 @@
+TARGET_CLASS,criterion,Coverage,Total_Goals,Covered_Goals
+Calcolatrice,LINE,1.0,4,4
+Calcolatrice,BRANCH,1.0,3,3
+Calcolatrice,EXCEPTION,1.0,0,0
+Calcolatrice,WEAKMUTATION,1.0,20,20
+Calcolatrice,OUTPUT,0.0,3,0
+Calcolatrice,METHOD,0.0,2,0
+Calcolatrice,METHODNOEXCEPTION,0.0,2,0
+Calcolatrice,CBRANCH,0.0,3,0

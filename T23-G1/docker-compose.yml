@@ -1,0 +1,59 @@
+name: t23
+
+volumes:
+  mysql_data_volume:
+
+services:
+  db:
+    image: mysql:latest
+    container_name: t23-mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./mysql_init/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data_volume:/var/lib/mysql
+    
+    # --- MODIFICA FONDAMENTALE QUI SOTTO ---
+    ports:
+      - "3306:3306"  # Ora la porta 3306 porta al DATABASE, non all'app
+    # ---------------------------------------
+    
+    expose:
+      - 3306
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "${MYSQL_USER}", "-p${MYSQL_PASSWORD}" ]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
+    networks:
+      - global-network
+    restart: always
+
+  app:
+    image: mick0974/a13:t23-g1
+    container_name: t23-controller
+    
+    # --- CORREZIONE QUI SOTTO ---
+    ports:
+      - "8082:8082" # L'app esce sulla 8082, NON sulla 3306!
+    # ----------------------------
+
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_KEY_SECRET: ${JWT_KEY_SECRET}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+    networks:
+      - global-network
+
+networks:
+  global-network:
+    external: true
