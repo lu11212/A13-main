@@ -317,7 +317,7 @@
                     </div>
                 </div>
 
-                <div id="view-social" class="view-section d-none">
+<div id="view-social" class="view-section d-none">
                     <div class="d-flex justify-content-between mb-3">
                         <div class="btn-group">
                             <button class="btn btn-outline-light active" id="btn-show-followers" onclick="showSocialTab('followers')">Followers</button>
@@ -326,10 +326,52 @@
                         <a href="/SearchFriend" class="btn btn-primary"><i class="bi bi-person-plus"></i> Cerca</a>
                     </div>
                     
-                    <div id="followers_block" class="row g-3"></div>
-                    <div id="following_block" class="row g-3 d-none"></div>
+                    <div id="followers_block" class="row g-3">
+                        <div class="col-md-6" th:each="u : ${followersList}">
+                            <div class="p-3 rounded d-flex align-items-center gap-3 border border-secondary" 
+                                 style="background-color: #2c3034 !important;" 
+                                 th:if="${u != null}">
+                                
+                                <img th:src="${u['profilePicturePath'] != null ? '/t5/images/profileImages/' + u['profilePicturePath'] : '/t5/images/profileImages/default.png'}" 
+                                     class="rounded-circle" style="width:50px; height:50px; object-fit:cover;"
+                                     alt="Avatar">
+                                
+                                <div>
+                                    <h6 class="mb-0 text-light" th:text="${u['name'] + ' ' + u['surname']}">Nome</h6>
+                                    <small class="text-muted" th:text="'@' + ${u['nickname']}">@nick</small>
+                                </div>
+                                
+                                <a th:href="@{'/friend/' + ${u['userId']}}" class="btn btn-sm btn-outline-primary ms-auto">Vedi</a>
+                            </div>
+                        </div>
+                        <div th:if="${followersList == null or followersList.isEmpty()}" class="col-12 text-center text-muted">Nessun follower.</div>
+                    </div>
+
+                    <div id="following_block" class="row g-3 d-none">
+                        <div class="col-md-6" th:each="u : ${followingList}">
+                            
+                            <div class="p-3 rounded d-flex align-items-center gap-3 border border-secondary"
+                                 style="background-color: #2c3034 !important;" 
+                                 th:if="${u != null}">
+                                
+                                <img th:src="${u['profilePicturePath'] != null ? '/t5/images/profileImages/' + u['profilePicturePath'] : '/t5/images/profileImages/default.png'}" 
+                                     class="rounded-circle" style="width:50px; height:50px; object-fit:cover;"
+                                     alt="Avatar">
+                                
+                                <div>
+                                    <h6 class="mb-0 text-light" th:text="${u['name'] + ' ' + u['surname']}">Nome</h6>
+                                    <small class="text-muted" th:text="'@' + ${u['nickname']}">@nick</small>
+                                </div>
+                                
+                                <a th:href="@{'/friend/' + ${u['userId']}}" class="btn btn-sm btn-outline-primary ms-auto">Vedi</a>
+                            </div>
+                        </div>
+                        <div th:if="${followingList == null or followingList.isEmpty()}" class="col-12 text-center text-muted">Non segui nessuno.</div>
+                    </div>
                 </div>
 
+
+                
             </div>
         </div>
     </div>
@@ -434,8 +476,9 @@
                 .catch(err => console.error("Err Social:", err));
         }
 
-        loadUsers("/followers", "followers_block");
-        loadUsers("/following", "following_block");
+// MODIFICA QUI: Aggiunto il prefisso /profile/
+        loadUsers("/profile/followers", "followers_block");
+        loadUsers("/profile/following", "following_block");
     });
 </script>
 

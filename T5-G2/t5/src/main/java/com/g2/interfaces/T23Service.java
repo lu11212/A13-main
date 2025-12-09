@@ -355,15 +355,17 @@ public class T23Service extends BaseService {
         return callRestPost(endpoint, map, null, String.class);
     }
 
-    public List<User> getFollowers(String userId) {
+// Modifichiamo il tipo di ritorno da List<User> a List<Map<String, Object>>
+    public List<Map<String, Object>> getFollowers(String userId) {
         final String endpoint = "/profile/followers";
         Map<String, String> queryParams = Map.of("userId", userId);
-        return callRestGET(endpoint, queryParams, new ParameterizedTypeReference<List<User>>() {});
+        // Usiamo ParameterizedTypeReference per dire: "Prendi tutto il JSON così com'è"
+        return callRestGET(endpoint, queryParams, new ParameterizedTypeReference<List<Map<String, Object>>>() {});
     }
 
-    public List<User> getFollowing(String userId) {
+    public List<Map<String, Object>> getFollowing(String userId) {
         final String endpoint = "/profile/following";
         Map<String, String> queryParams = Map.of("userId", userId);
-        return callRestGET(endpoint, queryParams, new ParameterizedTypeReference<List<User>>() {});
+        return callRestGET(endpoint, queryParams, new ParameterizedTypeReference<List<Map<String, Object>>>() {});
     }
 }

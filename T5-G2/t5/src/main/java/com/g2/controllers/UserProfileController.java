@@ -201,16 +201,26 @@ public class UserProfileController {
     // ==== ALTRI ENDPOINT (Social, Team...) ====
     // ==========================================
 
-    @GetMapping("/followers")
+// --- SOCIAL (Modificati per bypassare il Gateway) ---
+    
+    // Era: @GetMapping("/followers")
+    @GetMapping("/profile/followers") 
     public ResponseEntity<?> getFollowers(@RequestParam String userId) {
-        try { return ResponseEntity.ok(serviceManager.handleRequest("T23", "getFollowers", userId)); } 
-        catch (Exception e) { return ResponseEntity.ok(new ArrayList<>()); }
+        try {
+            return ResponseEntity.ok(serviceManager.handleRequest("T23", "getFollowers", userId));
+        } catch (Exception e) {
+            return ResponseEntity.ok(new ArrayList<>());
+        }
     }
 
-    @GetMapping("/following")
+    // Era: @GetMapping("/following")
+    @GetMapping("/profile/following")
     public ResponseEntity<?> getFollowing(@RequestParam String userId) {
-        try { return ResponseEntity.ok(serviceManager.handleRequest("T23", "getFollowing", userId)); } 
-        catch (Exception e) { return ResponseEntity.ok(new ArrayList<>()); }
+        try {
+            return ResponseEntity.ok(serviceManager.handleRequest("T23", "getFollowing", userId));
+        } catch (Exception e) {
+            return ResponseEntity.ok(new ArrayList<>());
+        }
     }
 
     @GetMapping("/edit_profile")
