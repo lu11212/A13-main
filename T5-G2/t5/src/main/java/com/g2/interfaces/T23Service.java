@@ -123,7 +123,7 @@ public class T23Service extends BaseService {
         ));
     }
 
-    private void registerGetUserActions() {
+private void registerGetUserActions() {
         registerAction("GetUsers", new ServiceActionDefinition(params -> getUsers()));
         
         registerAction("GetUser", new ServiceActionDefinition(
@@ -135,10 +135,59 @@ public class T23Service extends BaseService {
                 params -> getUserByList((List<String>) params[0]),
                 List.class
         ));
+
+        // --- VERSIONE STABILE (1 Parametro: solo Email) ---
+        // NON LO TOCCHIAMO, così il profilo non si rompe.
         registerAction("GetUserByEmail", new ServiceActionDefinition(
                 params -> getUserByEmail((String) params[0]),
                 String.class
         ));
+
+        // --- NUOVA AZIONE: RICERCA (4 Parametri: JWT + Termine + Pagina + Dimensione) ---
+        // Aggiungiamo solo questa riga.
+        registerAction("searchUserProfiles", new ServiceActionDefinition(
+                params -> searchUserProfiles((String) params[0], (String) params[1], (Integer) params[2], (Integer) params[3]),
+                String.class, String.class, Integer.class, Integer.class
+        ));
+    }
+
+// --- METODO PRIVATO RICERCA (Con Doppia Autenticazione) ---
+    private Object searchUserProfiles(String jwt, String searchTerm, int page, int size) {
+        final String endpoint = "/profile/searchUserProfiles";
+        
+        String url = UriComponentsBuilder.fromHttpUrl(BASE_URL + "/" + SERVICE_PREFIX + endpoint)
+                .queryParam("searchTerm", searchTerm)
+                .queryParam("page", page)
+                .queryParam("size", size)
+                .toUriString();
+
+        try {
+             HttpHeaders headers = new HttpHeaders();
+             
+             if (jwt != null && !jwt.isEmpty()) {
+                 String cleanJwt = jwt.trim();
+                 
+                 // STRATEGIA 1: Header Standard
+                 headers.set("Authorization", "Bearer " + cleanJwt);
+                 
+                 // STRATEGIA 2: Cookie (Quella che piace a T23!)
+                 headers.set("Cookie", "jwt=" + cleanJwt);
+             }
+             
+             HttpEntity<?> entity = new HttpEntity<>(headers);
+
+             // Chiediamo un Object generico
+             ResponseEntity<Object> response = restTemplate.exchange(
+                    url, 
+                    HttpMethod.GET, 
+                    entity, 
+                    Object.class
+             );
+             return response.getBody();
+        } catch (Exception e) {
+            logger.error("Errore ricerca T23", e);
+            return null;
+        }
     }
 
     private void registerPlayerStatusActions() {

@@ -21,6 +21,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import org.springframework.http.MediaType;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -223,6 +225,35 @@ public class UserProfileController {
         }
     }
 
+// ==========================================
+    // ==== API DI RICERCA (Versione Robusta) ===
+    // ==========================================
+    @GetMapping("/profile/search_api")
+    @ResponseBody
+    public ResponseEntity<?> searchUserProfiles(
+            @RequestParam String searchTerm,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @CookieValue(name = "jwt", required = false) String jwt) {
+        
+        try {
+            if (jwt == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+            Object result = serviceManager.handleRequest("T23", "searchUserProfiles", jwt, searchTerm, page, size);
+            
+            // FIX: Se è null, restituisci una mappa vuota per evitare crash JS
+            if (result == null) {
+                return ResponseEntity.ok(Map.of("content", List.of(), "totalPages", 0));
+            }
+
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.error("Errore controller ricerca", e);
+            // Restituisci JSON vuoto anche in caso di errore
+            return ResponseEntity.ok(Map.of("content", List.of(), "totalPages", 0));
+        }
+    }
+
     @GetMapping("/edit_profile")
     public String showEditProfile(Model model, @CookieValue(name = "jwt", required = false) String jwt) {
        if (jwt == null) jwt = JwtRequestContext.getJwtToken();
@@ -241,17 +272,44 @@ public class UserProfileController {
        return editPage.handlePageRequest();
     }
 
-    @GetMapping("/friend/{playerID}")
-    public String friendProfilePage(Model model, @PathVariable("playerID") Long playerID) {
-        PageBuilder profile = new PageBuilder(serviceManager, "profile", model, JwtRequestContext.getJwtToken());
+@GetMapping("/friend/{playerID}")
+    public String friendProfilePage(Model model, @PathVariable("playerID") Long playerID, @CookieValue(name = "jwt", required = false) String jwt) {
+        if (jwt == null) jwt = JwtRequestContext.getJwtToken();
+        PageBuilder profile = new PageBuilder(serviceManager, "profile", model, jwt);
+        
+        // 1. Carica TE STESSO (userInfo) per la Navbar
+        String myEmail = extractEmailFromJwt(jwt);
+        if (myEmail != null) {
+            try {
+                // Usa la versione semplice a 1 parametro se non hai aggiornato il service, 
+                // oppure quella a 2 parametri (jwt, email) se l'hai aggiornata.
+                // Per sicurezza usiamo quella semplice qui, visto che il tuo T23Service attuale supporta quella.
+                User myself = (User) serviceManager.handleRequest("T23", "GetUserByEmail", myEmail);
+                if (myself != null) {
+                    model.addAttribute("userInfo", myself);
+                }
+            } catch (Exception e) { logger.error("Errore caricamento userInfo", e); }
+        }
+
+        // 2. Carica L'AMICO (user) per il Profilo
         try {
             User friend = (User) serviceManager.handleRequest("T23", "GetUser", String.valueOf(playerID));
             if (friend != null) {
                 model.addAttribute("user", friend);
                 model.addAttribute("isFriendProfile", true);
+                
+                // Carica statistiche amico (opzionale)
+                try {
+                     PlayerProgressDTO progress = (PlayerProgressDTO) serviceManager.handleRequest("T23", "getPlayerProgressAgainstAllOpponent", friend.getId());
+                     model.addAttribute("playerProgress", progress);
+                     if (progress != null) model.addAttribute("userCurrentExperience", progress.getExperiencePoints());
+                     else model.addAttribute("userCurrentExperience", 0);
+                } catch (Exception ex) {}
+
                 profile.setObjectComponents(new GenericObjectComponent("user", friend));
             }
-        } catch (Exception e) {}
+        } catch (Exception e) { logger.error("Errore profilo amico", e); }
+        
         return profile.handlePageRequest();
     }
 

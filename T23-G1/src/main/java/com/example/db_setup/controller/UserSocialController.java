@@ -24,13 +24,32 @@ public class UserSocialController {
     @Autowired
     private PlayerService playerService;
 
-    // --- RICERCA PROFILI ---
-    @GetMapping("/searchUserProfiles")
-    public Page<UserProfile> searchUserProfiles(
+// ==========================================
+    // ==== RICERCA PROFILI (Fix JSON Vuoto) ====
+    // ==========================================
+ @GetMapping("/searchUserProfiles")
+    public ResponseEntity<Map<String, Object>> searchUserProfiles(
             @RequestParam String searchTerm,
             @RequestParam int page,
             @RequestParam int size) {
-        return userSocialService.searchUserProfiles(searchTerm, page, size);
+        
+        // DEBUG: Vediamo cosa arriva davvero qui
+        System.out.println("T23 SEARCH: Cercando '" + searchTerm + "'");
+
+        Page<UserProfile> pageResult = userSocialService.searchUserProfiles(searchTerm, page, size);
+        
+        System.out.println("T23 SEARCH: Trovati " + pageResult.getTotalElements() + " risultati");
+        
+        // 2. Costruiamo MANUALMENTE la risposta JSON semplice
+        // Questo è il trucco: creiamo una Mappa che diventa un JSON sicuro
+        Map<String, Object> response = new HashMap<>();
+        
+        response.put("content", pageResult.getContent());       // LISTA UTENTI (Quello che ci serve!)
+        response.put("totalPages", pageResult.getTotalPages());   
+        response.put("totalElements", pageResult.getTotalElements()); 
+        
+        // 3. Restituiamo la mappa
+        return ResponseEntity.ok(response);
     }
 
     // ====================================================================
