@@ -333,9 +333,31 @@ private void registerGetUserActions() {
         return callRestGET(endpoint, null, new ParameterizedTypeReference<List<User>>() {});
     }
 
+// --- METODO GET USER (Aggiornato) ---
     private User getUser(String userId) {
-        final String endpoint = "/student/students_list/" + userId;
-        return callRestGET(endpoint, null, User.class);
+        // NUOVO ENDPOINT (Quello che abbiamo appena creato in T23)
+        final String endpoint = "/profile/user_by_id";
+        Map<String, String> queryParams = Map.of("id", userId);
+        
+        try {
+            // Facciamo la chiamata e otteniamo il JSON grezzo
+            String jsonRaw = callRestGET(endpoint, queryParams, String.class);
+            
+            if (jsonRaw == null || jsonRaw.trim().isEmpty()) return null;
+            
+            // Usiamo il Mapper per convertire il JSON in oggetto User
+            JsonNode root = mapper.readTree(jsonRaw);
+            
+            if (root.isArray()) {
+                if (root.size() > 0) return mapper.treeToValue(root.get(0), User.class);
+                else return null;
+            } else if (root.isObject()) {
+                return mapper.treeToValue(root, User.class);
+            }
+        } catch (Exception e) { 
+            logger.error("Errore parsing user by ID", e); 
+        }
+        return null;
     }
 
     private List<User> getUserByList(List<String> idsStudenti) {

@@ -275,53 +275,68 @@ public class UserProfileController {
 @GetMapping("/friend/{playerID}")
     public String friendProfilePage(Model model, @PathVariable("playerID") Long playerID, @CookieValue(name = "jwt", required = false) String jwt) {
         if (jwt == null) jwt = JwtRequestContext.getJwtToken();
-        PageBuilder profile = new PageBuilder(serviceManager, "friend_profile", model, jwt); // <--- CAMBIO QUI: "friend_profile"
+        PageBuilder profile = new PageBuilder(serviceManager, "friend_profile", model, jwt);
         
-        // 1. Carica TE STESSO (per la Navbar)
+        // 1. Carica TE STESSO
         String myEmail = extractEmailFromJwt(jwt);
+        User myself = null;
         if (myEmail != null) {
             try {
-                User myself = (User) serviceManager.handleRequest("T23", "GetUserByEmail", myEmail);
+                myself = (User) serviceManager.handleRequest("T23", "GetUserByEmail", myEmail);
                 if (myself != null) model.addAttribute("userInfo", myself);
             } catch (Exception e) {}
         }
 
-        // 2. Carica L'AMICO (per il contenuto)
+        // 2. Carica AMICO
         try {
             User friend = (User) serviceManager.handleRequest("T23", "GetUser", String.valueOf(playerID));
             if (friend != null) {
-                model.addAttribute("user", friend); // <--- Questo è l'amico
+                model.addAttribute("user", friend);
                 
-                // Carica statistiche amico
+                // Statistiche (Gestione NULL robusta)
                 try {
                      PlayerProgressDTO progress = (PlayerProgressDTO) serviceManager.handleRequest("T23", "getPlayerProgressAgainstAllOpponent", friend.getId());
-                     model.addAttribute("playerProgress", progress);
-                     if (progress != null) model.addAttribute("userCurrentExperience", progress.getExperiencePoints());
-                     else model.addAttribute("userCurrentExperience", 0);
-                } catch (Exception ex) {}
-
-                // Carica config livelli (per il cerchio)
-                if (gameConfigData != null) {
-                    model.addAttribute("startingLevel", gameConfigData.getStartingLevel());
-                    model.addAttribute("expPerLevel", gameConfigData.getExpPerLevel());
-                    model.addAttribute("maxLevel", gameConfigData.getMaxLevel());
+                     // Se progress è null, creiamo un oggetto vuoto o gestiamo nel template
+                     model.addAttribute("playerProgress", progress); 
+                } catch (Exception ex) {
+                     model.addAttribute("playerProgress", null); // Assicura che sia null esplicito
                 }
 
-                // Carica social dell'amico
+                // Social e Calcolo "amIFollowing"
+                boolean amIFollowing = false;
                 try {
                     String friendIdStr = String.valueOf(friend.getId());
                     List<Map<String, Object>> followers = (List<Map<String, Object>>) serviceManager.handleRequest("T23", "getFollowers", friendIdStr);
-                    List<Map<String, Object>> following = (List<Map<String, Object>>) serviceManager.handleRequest("T23", "getFollowing", friendIdStr);
-                    model.addAttribute("followersList", followers != null ? followers : new ArrayList<>());
-                    model.addAttribute("followingList", following != null ? following : new ArrayList<>());
-                } catch (Exception ex) {}
+                    
+                    if (myself != null && followers != null) {
+                        String myIdStr = String.valueOf(myself.getId());
+                        for(Map<String, Object> f : followers) {
+                            Object fId = f.get("userId");
+                            // Gestione sicura del tipo (Integer o String)
+                            if (fId != null && String.valueOf(fId).equals(myIdStr)) {
+                                amIFollowing = true;
+                                break;
+                            }
+                        }
+                    }
+                } catch (Exception ex) { logger.warn("Err social friend", ex); }
+                
+                model.addAttribute("amIFollowing", amIFollowing);
 
                 profile.setObjectComponents(new GenericObjectComponent("user", friend));
+            } else {
+                // Se l'amico non esiste, reindirizza o mostra errore
+                return "redirect:/profile"; 
             }
-        } catch (Exception e) { logger.error("Errore profilo amico", e); }
+        } catch (Exception e) { 
+            logger.error("Errore profilo amico", e);
+            return "redirect:/profile";
+        }
         
         return profile.handlePageRequest();
     }
+
+
 
     @GetMapping("/Team")
     public String profileTeamPage(Model model) {

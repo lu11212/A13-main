@@ -98,6 +98,37 @@ public class UserSocialController {
         }
     }
 
+// ==========================================
+    // ==== GET USER BY ID (Nuovo Endpoint) =====
+    // ==========================================
+    @GetMapping("/user_by_id")
+    public ResponseEntity<?> getUserById(@RequestParam("id") Long id) {
+        try {
+            // Usiamo il service per recuperare il Player
+            com.example.db_setup.model.Player player = playerService.getUserByID(id);
+            
+            if (player == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utente non trovato");
+            }
+            
+            // Costruiamo la risposta identica a getUserByEmail
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", player.getID());
+            response.put("email", player.getEmail());
+            response.put("userProfile", player.getUserProfile());
+            
+            // Campi extra per sicurezza
+            response.put("name", player.getName());
+            response.put("surname", player.getSurname());
+            
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Errore: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/getStudentiTeam")
     public ResponseEntity<?> getStudentiTeam(@RequestBody List<String> idsStudenti) {
         return playerService.getStudentiTeam(idsStudenti);

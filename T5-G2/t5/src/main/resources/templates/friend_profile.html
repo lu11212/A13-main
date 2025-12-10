@@ -2,32 +2,12 @@
 <html lang="it" data-bs-theme="dark">
 <head>
     <div th:replace="fragments/header :: header"></div>
-    <title>Profilo Amico</title>
+    <title th:text="${user != null ? user.userProfile.name + ' ' + user.userProfile.surname : 'Profilo non trovato'}">Profilo Amico</title>
     <style>
-        /* Avatar Profilo */
         .profile-header-avatar { width: 160px; height: 160px; object-fit: cover; border: 6px solid #212529; box-shadow: 0 0 20px rgba(0,0,0,0.5); background-color: #212529; }
-        
-        /* Card Principale */
-        .profile-card {
-            background-color: #2c3034;
-            border: none;
-            border-radius: 15px;
-            margin-top: 80px;
-            padding-top: 90px;
-            position: relative;
-            overflow: visible;
-        }
-
-        /* Selettore Vista */
-        .view-selector { background-color: #0d6efd; border: none; color: white; font-weight: bold; text-align: center; text-align-last: center; cursor: pointer; transition: background 0.3s; }
-        .view-selector:hover { background-color: #0b5ed7; box-shadow: 0 0 10px rgba(13, 110, 253, 0.5); }
-        option { background-color: #212529; color: white; }
-
-        /* Statistiche */
+        .profile-card { background: linear-gradient(145deg, #1a1d20, #212529); border: none; border-radius: 15px; margin-top: 80px; padding-top: 90px; position: relative; overflow: visible; }
         .stat-box { background-color: #2c3034; border-radius: 12px; transition: transform 0.2s; border-left: 5px solid #0d6efd; }
         .stat-box:hover { transform: translateY(-5px); background-color: #343a40; }
-        
-        /* Cerchio Livello */
         .progress_container { position: relative; width: 150px; height: 150px; margin: 0 auto; }
         .progress-svg { transform: rotate(-90deg); }
         .progress_background { fill: none; stroke: #333; stroke-width: 12; }
@@ -40,33 +20,50 @@
 <div th:replace="fragments/navbar :: navbar"></div>
 
 <div class="container pb-5">
+    
+    <div class="row mb-3 mt-4">
+        <div class="col-12">
+            <a href="/SearchFriend" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-2"></i>Torna alla Ricerca</a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center" th:if="${user == null}">
+        <div class="col-lg-8 text-center">
+            <div class="alert alert-warning">
+                <h4><i class="fas fa-exclamation-triangle"></i> Utente non trovato</h4>
+                <p>Impossibile visualizzare il profilo richiesto.</p>
+                <a href="/SearchFriend" class="btn btn-primary mt-2">Cerca qualcun altro</a>
+            </div>
+        </div>
+    </div>
 
     <div class="row justify-content-center" th:if="${user != null}">
         <div class="col-lg-8">
             <div class="card profile-card shadow text-center position-relative">
                 <div class="position-absolute top-0 start-50 translate-middle">
-                    <img th:src="${user.userProfile?.profilePicturePath != null ? '/t5/images/profileImages/' + user.userProfile.profilePicturePath : '/t5/images/default.png'}"
-                         class="rounded-circle profile-header-avatar" 
-                         alt="Avatar"
+                    <img th:src="${user.userProfile.profilePicturePath != null ? '/t5/images/profileImages/' + user.userProfile.profilePicturePath : '/t5/images/default.png'}"
+                         class="rounded-circle profile-header-avatar" alt="Avatar"
                          onerror="this.src='/t5/images/profileImages/default.png'">
                 </div>
 
                 <div class="card-body px-5 pb-4">
-                    <h2 class="fw-bold mb-0" th:text="${user.userProfile?.name + ' ' + user.userProfile?.surname}">Nome</h2>
-                    
-                    <p class="text-primary mb-3 fw-semibold" 
-                       th:if="${user.userProfile?.nickname != null}"
-                       th:text="'@' + ${user.userProfile.nickname}">@nickname</p>
+                    <h2 class="fw-bold mb-0" th:text="${user.userProfile.name} + ' ' + ${user.userProfile.surname}">Nome</h2>
+                    <p class="text-primary mb-3 fw-semibold" th:text="'@' + ${user.userProfile.nickname}">@nickname</p>
 
                     <div class="bg-dark bg-opacity-50 p-3 rounded mb-4 d-inline-flex align-items-start justify-content-center" style="max-width: 600px;">
-                        <i class="bi bi-quote text-secondary me-2" style="font-size: 0.9rem; transform: translateY(-3px);"></i>
-                        <span class="fst-italic text-light" style="line-height: 1.4;" 
-                              th:text="${user.userProfile?.bio ?: 'Nessuna biografia.'}"></span>
-                        <i class="bi bi-quote text-secondary ms-2" style="font-size: 0.9rem; transform: scaleX(-1) translateY(-3px); display: inline-block;"></i>
+                        <i class="fas fa-quote-left text-secondary me-2" style="font-size: 0.9rem; transform: translateY(-3px);"></i>
+                        <span class="fst-italic text-light" style="line-height: 1.4;" th:text="${user.userProfile.bio ?: 'Nessuna biografia.'}"></span>
+                        <i class="fas fa-quote-right text-secondary ms-2" style="font-size: 0.9rem; transform: translateY(-3px);"></i>
                     </div>
 
-                    <div>
-                        <span class="badge bg-secondary px-3 py-2 rounded-pill">Stai visualizzando un amico</span>
+                    <div class="mt-3">
+                        <button id="followButton" 
+                                class="btn px-5 fw-bold rounded-pill shadow-sm"
+                                th:classappend="${amIFollowing} ? 'btn-danger' : 'btn-primary'"
+                                th:text="${amIFollowing} ? 'Unfollow' : 'Follow'"
+                                th:attr="data-friend-id=${user.id}">
+                            Follow
+                        </button>
                     </div>
                 </div>
             </div>
@@ -75,66 +72,33 @@
 
     <div class="row justify-content-center mt-5" th:if="${user != null}">
         <div class="col-lg-10">
-            <div class="mb-4 position-relative">
-                <select id="viewSelector" class="form-select form-select-lg view-selector rounded-pill shadow-sm" onchange="changeView(this.value)">
-                    <option value="stats">📊 Statistiche Giocatore</option>
-                    <option value="history">🕒 Storico Partite</option>
-                    <option value="achievements">🏆 Achievements</option>
-                    <option value="social">👥 Amici</option>
-                </select>
-            </div>
-
-            <div class="bg-dark rounded-4 p-4 shadow border border-secondary border-opacity-25" style="min-height: 300px;">
+            <div class="bg-dark rounded-4 p-4 shadow border border-secondary border-opacity-25">
+                <h4 class="border-bottom border-secondary pb-2 mb-4 text-center">Statistiche Giocatore</h4>
                 
-                <div id="view-stats" class="view-section">
-                    <div th:if="${playerProgress == null}" class="text-center py-5 text-muted">Statistiche non disponibili.</div>
-                    <div th:if="${playerProgress != null}" class="row g-4 text-center">
-                        <div class="col-md-4"><div class="stat-box p-4 h-100"><h1 class="display-4 fw-bold text-primary mb-0" th:text="${playerProgress.experiencePoints}">0</h1><p class="text-uppercase text-muted small fw-bold">XP</p></div></div>
-                        <div class="col-md-4"><div class="stat-box p-4 h-100" style="border-left-color: #198754;"><h1 class="display-4 fw-bold text-success mb-0" th:text="${playerProgress.gameProgressesDTO != null ? playerProgress.gameProgressesDTO.size() : 0}">0</h1><p class="text-uppercase text-muted small fw-bold">Partite</p></div></div>
-                        <div class="col-md-4"><div class="stat-box p-4 h-100" style="border-left-color: #ffc107;"><h1 class="display-4 fw-bold text-warning mb-0" th:text="${playerProgress.gameProgressesDTO != null ? playerProgress.gameProgressesDTO.?[isWon == true].size() : 0}">0</h1><p class="text-uppercase text-muted small fw-bold">Vittorie</p></div></div>
-                    </div>
-                </div>
-
-                <div id="view-history" class="view-section d-none">
-                     <div class="table-responsive">
-                        <table class="table table-dark table-hover align-middle" th:if="${playerProgress != null}">
-                            <thead><tr><th>Classe</th><th>Modalità</th><th>Esito</th></tr></thead>
-                            <tbody><tr th:each="game : ${playerProgress.gameProgressesDTO}"><td th:text="${game.classUT}"></td><td th:text="${game.gameMode}"></td><td><span class="badge rounded-pill" th:classappend="${game.isWon} ? 'text-bg-success' : 'text-bg-danger'" th:text="${game.isWon} ? 'VITTORIA' : 'SCONFITTA'"></span></td></tr></tbody>
-                        </table>
-                    </div>
-                    <div th:if="${playerProgress == null}" class="text-center text-muted">Nessuno storico disponibile.</div>
-                </div>
-
-                <div id="view-achievements" class="view-section d-none">
-                     <div class="d-sm-flex align-items-center justify-content-around mt-3 mb-5 p-4 rounded border border-secondary" style="background-color: #212529;">
-                        <div class="text-center"><h4 class="mb-0 fw-semibold lh-1" th:text="${userCurrentExperience}">0</h4><p class="text-muted">Punti Totali</p></div>
-                        <div class="progress_container" th:if="${userCurrentExperience != null}" th:attr="data-progress=(${userCurrentExperience} % ${expPerLevel}) / ${expPerLevel}">
-                            <svg class="progress-svg" width="150" height="150" viewBox="0 0 120 120"><circle class="progress_background" cx="60" cy="60" r="50" style="stroke: #1a1d20;" /><circle class="progress_fill" cx="60" cy="60" r="50" /></svg>
-                            <div class="progress_value" th:text="${(userCurrentExperience / expPerLevel) + startingLevel == maxLevel} ? 'Lv. MAX' : 'Lv. ' + ${(userCurrentExperience / expPerLevel) + startingLevel}">Lv. 1</div>
+                <div th:if="${playerProgress != null}" class="row g-4 text-center">
+                    <div class="col-md-4">
+                        <div class="stat-box p-4 h-100">
+                            <h1 class="display-4 fw-bold text-primary mb-0" th:text="${playerProgress.experiencePoints}">0</h1>
+                            <p class="text-uppercase text-muted small fw-bold spacing-2">XP Totali</p>
                         </div>
-                        <div class="text-center"><h4 class="mb-0 fw-semibold lh-1" th:text="${userCurrentExperience != null ? (expPerLevel - (userCurrentExperience % expPerLevel)) : 100}">100</h4><p class="text-muted">XP al Livello</p></div>
                     </div>
-                    <div class="row row-cols-1 row-cols-md-2 g-3" th:if="${playerProgress != null}">
-                        <div class="col" th:each="ach : ${playerProgress.globalAchievements}">
-                            <div class="d-flex align-items-center p-3 rounded border border-secondary" style="background-color: #212529;">
-                                <i class="bi bi-trophy-fill text-warning fs-2 me-3"></i>
-                                <div><h6 class="mb-0 text-light" th:text="${ach}">Nome Achievement</h6><small class="text-success">Sbloccato</small></div>
-                            </div>
+                    <div class="col-md-4">
+                        <div class="stat-box p-4 h-100" style="border-left-color: #198754;">
+                            <h1 class="display-4 fw-bold text-success mb-0" th:text="${playerProgress.gameProgressesDTO != null ? playerProgress.gameProgressesDTO.size() : 0}">0</h1>
+                            <p class="text-uppercase text-muted small fw-bold spacing-2">Partite</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-box p-4 h-100 border-warning" style="border-left-color: #ffc107;">
+                            <h1 class="display-4 fw-bold text-warning mb-0" th:text="${playerProgress.gameProgressesDTO != null ? playerProgress.gameProgressesDTO.?[isWon == true].size() : 0}">0</h1>
+                            <p class="text-uppercase text-muted small fw-bold spacing-2">Vittorie</p>
                         </div>
                     </div>
                 </div>
-
-                <div id="view-social" class="view-section d-none">
-                    <div class="d-flex justify-content-between mb-3">
-                         <div class="btn-group">
-                            <button class="btn btn-outline-light active" id="btn-show-followers" onclick="showSocialTab('followers')">Followers</button>
-                            <button class="btn btn-outline-light" id="btn-show-following" onclick="showSocialTab('following')">Following</button>
-                        </div>
-                    </div>
-                    <div id="followers_block" class="row g-3"></div>
-                    <div id="following_block" class="row g-3 d-none"></div>
+                
+                <div th:if="${playerProgress == null}" class="text-center text-muted py-3">
+                    <i class="fas fa-chart-bar me-2 opacity-50"></i>Statistiche non ancora disponibili.
                 </div>
-
             </div>
         </div>
     </div>
@@ -142,73 +106,9 @@
 
 <div th:replace="fragments/footer :: footer"></div>
 
-<span class="d-none" id="userProfileID" th:text="${user?.id}"></span>
+<span id="userProfileID" class="d-none" th:text="${userInfo != null ? userInfo.userProfile.id : ''}"></span>
 
-<script>
-    function changeView(viewName) {
-        document.querySelectorAll('.view-section').forEach(el => el.classList.add('d-none'));
-        document.getElementById('view-' + viewName).classList.remove('d-none');
-        if (viewName === 'achievements') {
-            setTimeout(() => {
-                let p = document.querySelector('.progress_container');
-                if (p) {
-                    let prog = eval(p.getAttribute('data-progress')); 
-                    document.querySelector(".progress_fill").style.strokeDashoffset = 314 * (1 - prog);
-                }
-            }, 100);
-        }
-    }
-
-    function showSocialTab(type) {
-        document.getElementById('btn-show-followers').classList.remove('active');
-        document.getElementById('btn-show-following').classList.remove('active');
-        document.getElementById('btn-show-' + type).classList.add('active');
-        document.getElementById('followers_block').className = type === 'followers' ? 'row g-3' : 'row g-3 d-none';
-        document.getElementById('following_block').className = type === 'following' ? 'row g-3' : 'row g-3 d-none';
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        const userId = document.getElementById('userProfileID').innerText;
-        if(!userId) return;
-
-        function loadUsers(endpoint, containerId) {
-            fetch(endpoint + "?userId=" + userId)
-                .then(res => res.json())
-                .then(users => {
-                    const container = document.getElementById(containerId);
-                    container.innerHTML = "";
-                    if(!users || users.length === 0) {
-                        container.innerHTML = "<p class='text-muted text-center w-100'>Nessun utente trovato.</p>";
-                        return;
-                    }
-                    users.forEach(u => {
-                        // FIX PERCORSO IMMAGINE
-                        const pic = u.profilePicturePath ? u.profilePicturePath : 'default.png';
-                        const imgPath = '/t5/images/profileImages/' + pic;
-                        // FIX ID LINK (Gestisce userId o id)
-                        const linkId = u.userId || u.id;
-                        
-                        container.innerHTML += `
-                            <div class="col-md-6">
-                                <div class="p-3 rounded d-flex align-items-center gap-3 border border-secondary" style="background-color: #2c3034 !important;">
-                                    <img src="${imgPath}" class="rounded-circle" style="width:50px; height:50px; object-fit:cover;" onerror="this.src='/t5/images/profileImages/default.png'">
-                                    <div>
-                                        <h6 class="mb-0 text-light">${u.name} ${u.surname}</h6>
-                                        <small class="text-muted">@${u.nickname}</small>
-                                    </div>
-                                    <a href="/friend/${linkId}" class="btn btn-sm btn-outline-primary ms-auto">Vedi</a>
-                                </div>
-                            </div>
-                        `;
-                    });
-                })
-                .catch(err => console.error("Err Social:", err));
-        }
-
-        loadUsers("/profile/followers", "followers_block");
-        loadUsers("/profile/following", "following_block");
-    });
-</script>
+<script src="/t5/js/friend_profile.js"></script>
 
 </body>
 </html>
