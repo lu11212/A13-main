@@ -275,35 +275,45 @@ public class UserProfileController {
 @GetMapping("/friend/{playerID}")
     public String friendProfilePage(Model model, @PathVariable("playerID") Long playerID, @CookieValue(name = "jwt", required = false) String jwt) {
         if (jwt == null) jwt = JwtRequestContext.getJwtToken();
-        PageBuilder profile = new PageBuilder(serviceManager, "profile", model, jwt);
+        PageBuilder profile = new PageBuilder(serviceManager, "friend_profile", model, jwt); // <--- CAMBIO QUI: "friend_profile"
         
-        // 1. Carica TE STESSO (userInfo) per la Navbar
+        // 1. Carica TE STESSO (per la Navbar)
         String myEmail = extractEmailFromJwt(jwt);
         if (myEmail != null) {
             try {
-                // Usa la versione semplice a 1 parametro se non hai aggiornato il service, 
-                // oppure quella a 2 parametri (jwt, email) se l'hai aggiornata.
-                // Per sicurezza usiamo quella semplice qui, visto che il tuo T23Service attuale supporta quella.
                 User myself = (User) serviceManager.handleRequest("T23", "GetUserByEmail", myEmail);
-                if (myself != null) {
-                    model.addAttribute("userInfo", myself);
-                }
-            } catch (Exception e) { logger.error("Errore caricamento userInfo", e); }
+                if (myself != null) model.addAttribute("userInfo", myself);
+            } catch (Exception e) {}
         }
 
-        // 2. Carica L'AMICO (user) per il Profilo
+        // 2. Carica L'AMICO (per il contenuto)
         try {
             User friend = (User) serviceManager.handleRequest("T23", "GetUser", String.valueOf(playerID));
             if (friend != null) {
-                model.addAttribute("user", friend);
-                model.addAttribute("isFriendProfile", true);
+                model.addAttribute("user", friend); // <--- Questo è l'amico
                 
-                // Carica statistiche amico (opzionale)
+                // Carica statistiche amico
                 try {
                      PlayerProgressDTO progress = (PlayerProgressDTO) serviceManager.handleRequest("T23", "getPlayerProgressAgainstAllOpponent", friend.getId());
                      model.addAttribute("playerProgress", progress);
                      if (progress != null) model.addAttribute("userCurrentExperience", progress.getExperiencePoints());
                      else model.addAttribute("userCurrentExperience", 0);
+                } catch (Exception ex) {}
+
+                // Carica config livelli (per il cerchio)
+                if (gameConfigData != null) {
+                    model.addAttribute("startingLevel", gameConfigData.getStartingLevel());
+                    model.addAttribute("expPerLevel", gameConfigData.getExpPerLevel());
+                    model.addAttribute("maxLevel", gameConfigData.getMaxLevel());
+                }
+
+                // Carica social dell'amico
+                try {
+                    String friendIdStr = String.valueOf(friend.getId());
+                    List<Map<String, Object>> followers = (List<Map<String, Object>>) serviceManager.handleRequest("T23", "getFollowers", friendIdStr);
+                    List<Map<String, Object>> following = (List<Map<String, Object>>) serviceManager.handleRequest("T23", "getFollowing", friendIdStr);
+                    model.addAttribute("followersList", followers != null ? followers : new ArrayList<>());
+                    model.addAttribute("followingList", following != null ? following : new ArrayList<>());
                 } catch (Exception ex) {}
 
                 profile.setObjectComponents(new GenericObjectComponent("user", friend));

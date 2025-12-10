@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it" data-bs-theme="dark">
 <head>
@@ -122,13 +123,19 @@
         </div>
     </div>
 
-    <div class="row justify-content-center" th:if="${userInfo != null}">
-        <div class="col-lg-8">
-            <div class="card profile-card shadow text-center position-relative">
-                <div class="position-absolute top-0 start-50 translate-middle">
-                    <img th:src="${userInfo.userProfile.profilePicturePath != null ? '/t5/images/profileImages/' + userInfo.userProfile.profilePicturePath : '/t5/images/default.png'}"
-                         class="rounded-circle profile-header-avatar" alt="Avatar">
-                </div>
+                <div class="row justify-content-center" th:if="${userInfo != null}">
+
+                        <div class="col-lg-8">
+
+                            <div class="card profile-card shadow text-center position-relative">
+
+                                <div class="position-absolute top-0 start-50 translate-middle">
+
+                                    <img th:src="${userInfo.userProfile.profilePicturePath != null ? '/t5/images/profileImages/' + userInfo.userProfile.profilePicturePath : '/t5/images/default.png'}"
+
+                                        class="rounded-circle profile-header-avatar" alt="Avatar">
+
+                                </div>
 
                 <div class="card-body px-5 pb-4">
                     <h2 class="fw-bold mb-0" th:text="${userInfo.userProfile.name} + ' ' + ${userInfo.userProfile.surname}">Nome</h2>
