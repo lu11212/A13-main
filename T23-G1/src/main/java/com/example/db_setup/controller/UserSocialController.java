@@ -28,68 +28,63 @@ public class UserSocialController {
     @Autowired
     private PlayerService playerService;
 
-// ==========================================
-    // ==== RICERCA PROFILI (Fix JSON Vuoto) ====
-    // ==========================================
+
+    // Funzione di ricerca profilo
  @GetMapping("/searchUserProfiles")
     public ResponseEntity<Map<String, Object>> searchUserProfiles(
             @RequestParam String searchTerm,
             @RequestParam int page,
             @RequestParam int size) {
         
-        // DEBUG: Vediamo cosa arriva davvero qui
+        // Log per debug
         System.out.println("T23 SEARCH: Cercando '" + searchTerm + "'");
 
         Page<UserProfile> pageResult = userSocialService.searchUserProfiles(searchTerm, page, size);
         
         System.out.println("T23 SEARCH: Trovati " + pageResult.getTotalElements() + " risultati");
         
-        // 2. Costruiamo MANUALMENTE la risposta JSON semplice
-        // Questo è il trucco: creiamo una Mappa che diventa un JSON sicuro
+        // Costruzione manuale della risposta per evitare problemi di serializzazione
         Map<String, Object> response = new HashMap<>();
         
-        response.put("content", pageResult.getContent());       // LISTA UTENTI (Quello che ci serve!)
+        response.put("content", pageResult.getContent());      
         response.put("totalPages", pageResult.getTotalPages());   
         response.put("totalElements", pageResult.getTotalElements()); 
         
-        // 3. Restituiamo la mappa
         return ResponseEntity.ok(response);
     }
 
-    // ====================================================================
-    // ==== METODO GET USER BY EMAIL (CORRETTO) ===========================
-    // ====================================================================
+    // metodo per ottenere un utente tramite email
     @GetMapping("/user_by_email")
     @ResponseBody
     public ResponseEntity<?> getUserByEmail(@RequestParam("email") String email) {
         try {
-            // 1. Recupera il profilo dal database
+            // Recupera il profilo dal database
             UserProfile profile = playerService.findProfileByEmail(email);
             
             if (profile == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utente non trovato");
             }
             
-            // 2. Costruiamo la risposta manualmente per T5
+            // Costruiamo la risposta manualmente per T5
             Map<String, Object> response = new HashMap<>();
             
-            // GESTIONE ID SICURA (Fix Compile Error)
+            // Gestiamo il caso in cui getUserId() possa essere null
             Long safeId = 0L;
             try {
-                // CORREZIONE: getUserId() è già un Long, quindi lo usiamo direttamente
+
                 if (profile.getUserId() != null) {
                      safeId = profile.getUserId();
                 }
             } catch (Exception e) {
-                // Fallback estremo se qualcosa va storto
+                
                 safeId = (long) email.hashCode();
             }
             
             response.put("id", safeId);
             response.put("email", email);
             response.put("userProfile", profile);
-            
-            // Campi di comodo per il frontend
+        
+            // Campi extra per sicurezza
             response.put("name", profile.getName());
             response.put("surname", profile.getSurname());
             response.put("nickname", profile.getNickname());
@@ -102,26 +97,24 @@ public class UserSocialController {
         }
     }
 
-// ==========================================
-    // ==== GET USER BY ID (Nuovo Endpoint) =====
-    // ==========================================
+
+    // nuovo metodo per visualizzare l'utente tramite ID
     @GetMapping("/user_by_id")
     public ResponseEntity<?> getUserById(@RequestParam("id") Long id) {
         try {
-            // Usiamo il service per recuperare il Player
+            
             com.example.db_setup.model.Player player = playerService.getUserByID(id);
             
             if (player == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utente non trovato");
             }
             
-            // Costruiamo la risposta identica a getUserByEmail
+            // risposta identica a getUserByEmail
             Map<String, Object> response = new HashMap<>();
             response.put("id", player.getID());
             response.put("email", player.getEmail());
             response.put("userProfile", player.getUserProfile());
             
-            // Campi extra per sicurezza
             response.put("name", player.getName());
             response.put("surname", player.getSurname());
             
@@ -132,6 +125,7 @@ public class UserSocialController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Errore: " + e.getMessage());
         }
     }
+
 
     @PostMapping("/getStudentiTeam")
     public ResponseEntity<?> getStudentiTeam(@RequestBody List<String> idsStudenti) {
@@ -180,9 +174,7 @@ public class UserSocialController {
         }
     }
 
-// ====================================================================
-    // ==== METODO UPDATE PROFILE (Versione Debug e Fix) ==================
-    // ====================================================================
+    // Metodo per aggiornare il profilo utente
     @PostMapping("/updateProfile")
     public ResponseEntity<Boolean> editProfile(
             @RequestParam("email") String email,
@@ -194,7 +186,7 @@ public class UserSocialController {
         System.out.println("Dati: Bio='" + bio + "', Nick='" + nickname + "', Img='" + profilePicturePath + "'");
 
         try {
-            // 1. Recuperiamo il profilo ESISTENTE dal DB (così è "attaccato" alla sessione Hibernate)
+            // recupero del profilo esistente
             UserProfile profile = playerService.findProfileByEmail(email);
             
             if (profile == null) {
@@ -202,7 +194,7 @@ public class UserSocialController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(false);
             }
             
-            // 2. Aggiorniamo i campi
+            // aggionrnamento dei campi
             profile.setBio(bio);
             profile.setProfilePicturePath(profilePicturePath);
             
@@ -210,7 +202,7 @@ public class UserSocialController {
                 profile.setNickname(nickname);
             }
             
-            // 3. Salviamo
+            // salvataggio del profilo aggiornato
             System.out.println("T23: Tentativo salvataggio...");
             playerService.saveProfile(profile);
             System.out.println("T23: Salvataggio riuscito!");
@@ -218,7 +210,7 @@ public class UserSocialController {
             return ResponseEntity.ok(true);
             
         } catch (Exception e) {
-            // QUESTO È FONDAMENTALE: Stampa l'errore vero nel terminale di T23
+            // stampa dell'eccezione per debug
             System.err.println("ECCEZIONE GRAVE IN T23 UPDATE:");
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);

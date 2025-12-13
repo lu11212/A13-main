@@ -16,10 +16,9 @@ services:
       - ./mysql_init/init.sql:/docker-entrypoint-initdb.d/init.sql
       - mysql_data_volume:/var/lib/mysql
     
-    # --- MODIFICA FONDAMENTALE QUI SOTTO ---
+    # modifica delle porte per il database
     ports:
-      - "3306:3306"  # Ora la porta 3306 porta al DATABASE, non all'app
-    # ---------------------------------------
+      - "3306:3306"  
     
     expose:
       - 3306
@@ -37,10 +36,9 @@ services:
     image: mick0974/a13:t23-g1
     container_name: t23-controller
     
-    # --- CORREZIONE QUI SOTTO ---
+    # modifica delle porte per l'applicazione
     ports:
-      - "8082:8082" # L'app esce sulla 8082, NON sulla 3306!
-    # ----------------------------
+      - "8082:8082" 
 
     depends_on:
       db:
