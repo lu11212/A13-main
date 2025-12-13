@@ -274,6 +274,7 @@ public class UserProfileController {
 
 @GetMapping("/friend/{playerID}")
     public String friendProfilePage(Model model, @PathVariable("playerID") Long playerID, @CookieValue(name = "jwt", required = false) String jwt) {
+        logger.info("=== FRIEND PROFILE PAGE for ID: {} ===", playerID);
         if (jwt == null) jwt = JwtRequestContext.getJwtToken();
         PageBuilder profile = new PageBuilder(serviceManager, "friend_profile", model, jwt);
         
@@ -290,6 +291,7 @@ public class UserProfileController {
         // 2. Carica AMICO
         try {
             User friend = (User) serviceManager.handleRequest("T23", "GetUser", String.valueOf(playerID));
+            logger.info("Friend loaded: {}", friend);
             if (friend != null) {
                 model.addAttribute("user", friend);
                 
@@ -304,15 +306,18 @@ public class UserProfileController {
 
                 // Social e Calcolo "amIFollowing"
                 boolean amIFollowing = false;
+                logger.info("Checking if myself follows friend...");
                 try {
-                    String friendIdStr = String.valueOf(friend.getId());
+                    String friendIdStr = String.valueOf(friend.getUserProfile().getId());
                     List<Map<String, Object>> followers = (List<Map<String, Object>>) serviceManager.handleRequest("T23", "getFollowers", friendIdStr);
+                    logger.info("Followers of {}: {}", friendIdStr, followers);
                     
                     if (myself != null && followers != null) {
                         String myIdStr = String.valueOf(myself.getId());
                         for(Map<String, Object> f : followers) {
                             Object fId = f.get("userId");
                             // Gestione sicura del tipo (Integer o String)
+                            logger.info("Checking follower ID: {}, {}, {}, isEqual: {}", fId, String.valueOf(fId), myIdStr, fId != null ? String.valueOf(fId).equals(myIdStr) : "fId is null");
                             if (fId != null && String.valueOf(fId).equals(myIdStr)) {
                                 amIFollowing = true;
                                 break;

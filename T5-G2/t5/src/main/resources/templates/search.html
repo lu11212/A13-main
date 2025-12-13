@@ -57,8 +57,8 @@
                 </div>
 
                 <!-- Allert -->
-                <div class="alert alert-primary" role="alert" id="init_alert" style="display: none;">
-                   Cerca utenti per email, nome e cognome oppure nickname!
+                <div class="alert alert-primary" role="alert" id="init_alert" style="display: none;" th:text="#{info_search}">
+                   
                 </div>
 
                 <!-- Loading -->
@@ -72,6 +72,10 @@
 
 
 <div th:replace="fragments/footer :: footer"></div>
+
+<span id="searchNotFound" style="display: none;" th:text="#{search_not_found}"></span>
+
+<span id="viexText" style="display: none;" th:text="#{view}"></span>
 
 <script>
   $(document).ready(function() {
@@ -110,8 +114,10 @@
         let resultsContainer = $("#followers_block");
         resultsContainer.empty();
 
+        const noResultsMsg = $("#searchNotFound").text();
+
         if (!data || !data.content || data.content.length === 0) {
-            resultsContainer.append("<p class='w-100 text-center text-white'>Nessun risultato trovato.</p>");
+            resultsContainer.append(`<p class='w-100 text-center text-white'>${noResultsMsg}</p>`);
             return;
         }
 
@@ -126,6 +132,8 @@
             // FIX LINK: T23 restituisce "userId" nel JSON
             let friendLink = '/friend/' + (user.userId || user.id || 0);
 
+            let view = $("#viexText").text();
+
             resultsContainer.append(
                 `<div class="col mb-4">
                     <div class="card bg-dark border-secondary">
@@ -139,7 +147,7 @@
                                 <h5 class="fw-semibold mb-0 text-white">${fullName}</h5>
                                 <span class="fs-6 d-flex align-items-center text-muted">@${user.nickname}</span>
                             </div>
-                            <a class="btn btn-primary py-1 px-2 ms-auto" href="${friendLink}">Vedi</a>                     
+                            <a class="btn btn-primary py-1 px-2 ms-auto" href="${friendLink}">${view} </a>                     
                         </div>
                     </div>
                 </div>`

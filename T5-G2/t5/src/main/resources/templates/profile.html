@@ -141,12 +141,10 @@
                     <h2 class="fw-bold mb-0" th:text="${userInfo.userProfile.name} + ' ' + ${userInfo.userProfile.surname}">Nome</h2>
                     
                     <p class="text-primary mb-3 fw-semibold" 
-                       th:if="${userInfo.userProfile.nickname != null and userInfo.userProfile.nickname != 'default_nickname'}"
+                       th:if="${userInfo.userProfile.nickname}"
                        th:text="'@' + ${userInfo.userProfile.nickname}">
                        @nickname
                     </p>
-                    
-                    <div th:if="${userInfo.userProfile.nickname == 'default_nickname'}" class="mb-3"></div>
 
                     <div class="bg-dark bg-opacity-50 p-3 rounded mb-4 d-inline-flex align-items-start justify-content-center" style="max-width: 600px;">
                         
@@ -162,7 +160,7 @@
                     </div>
                     <div>
                         <button class="btn btn-warning px-4 fw-bold rounded-pill" onclick="toggleEditMode()">
-                            <i class="bi bi-pencil-fill me-2"></i>Modifica Profilo
+                            <i class="bi bi-pencil-fill me-2" th:text="#{edit_profile}"></i>
                         </button>
                     </div>
                 </div>
@@ -174,7 +172,7 @@
         <div class="d-flex justify-content-center align-items-center min-vh-100 py-5">
             <div class="card bg-dark border-secondary shadow-lg text-light" style="width: 90%; max-width: 600px;">
                 <div class="card-header border-secondary bg-black d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0 text-warning"><i class="bi bi-palette-fill me-2"></i>Personalizza</h4>
+                    <h4 class="mb-0 text-warning"><i class="bi bi-palette-fill me-2" th:text="#{edit}"></i></h4>
                     <button type="button" class="btn-close btn-close-white" onclick="toggleEditMode()"></button>
                 </div>
                 <div class="card-body p-4">
@@ -182,7 +180,7 @@
                         <input type="hidden" name="email" th:value="${userInfo.email}">
                         <input type="hidden" id="selectedImageInput" name="selectedImage" th:value="${userInfo.userProfile.profilePicturePath}">
 
-                        <h5 class="mb-3 text-secondary">Scegli Avatar</h5>
+                        <h5 class="mb-3 text-secondary" th:text="#{choose_avatar}"></h5>
                         <div class="d-flex flex-wrap justify-content-center gap-3 mb-4 p-3 bg-black rounded border border-secondary">
                             <img th:each="imgName : ${stockImages}"
                                  th:src="@{'/t5/images/profileImages/' + ${imgName}}"
@@ -193,14 +191,14 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label text-secondary fw-bold">Biografia</label>
+                            <label class="form-label text-secondary fw-bold" th:text="#{bio}"></label>
                             <textarea class="form-control bg-dark text-light border-secondary" name="bio" rows="3" 
                                       th:text="${userInfo.userProfile.bio}"></textarea>
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success btn-lg fw-bold">Salva Modifiche</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="toggleEditMode()">Annulla</button>
+                            <button type="submit" class="btn btn-success btn-lg fw-bold" th:text="#{save_mod}"></button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="toggleEditMode()" th:text="#{undo}"></button>
                         </div>
                     </form>
                 </div>
@@ -213,10 +211,10 @@
             
             <div class="mb-4 position-relative">
                 <select id="viewSelector" class="form-select form-select-lg view-selector rounded-pill shadow-sm" onchange="changeView(this.value)">
-                    <option value="stats">📊 Statistiche Giocatore</option>
-                    <option value="history">🕒 Storico Partite</option>
-                    <option value="achievements">🏆 Achievements</option>
-                    <option value="social">👥 Social & Amici</option>
+                    <option value="stats" th:text="#{player_stats}"></option>
+                    <option value="history" th:text="#{history}"></option>
+                    <option value="achievements" th:text="#{achieve}"></option>
+                    <option value="social" th:text="#{social_and_friend}"></option>
                 </select>
             </div>
 
@@ -224,38 +222,38 @@
                 
                 <div id="view-stats" class="view-section">
                     <div th:if="${playerProgress == null}" class="text-center py-5 text-muted">
-                        <i class="bi bi-hourglass-split fs-1 d-block mb-3"></i>
-                        <h4>Statistiche in caricamento...</h4>
-                        <p>Se non appaiono, gioca una partita per inizializzare!</p>
+                        <i class="bi bi-hourglass-split fs-1 d-block mb-3" th:text="#{loading_stats}"></i>
+                        <h4></h4>
+                        <p th:text="#{alert_stats}"></p>
                     </div>
                     
                     <div th:if="${playerProgress != null}" class="row g-4 text-center">
                         <div class="col-md-4">
                             <div class="stat-box p-4 h-100">
                                 <h1 class="display-4 fw-bold text-primary mb-0" th:text="${playerProgress.experiencePoints}">0</h1>
-                                <p class="text-uppercase text-muted small fw-bold spacing-2">Punti Esperienza</p>
+                                <p class="text-uppercase text-muted small fw-bold spacing-2" th:text="#{exp_points}"></p>
                             </div>
                         </div>
                     <div class="col-md-4">
-                        <div class="stat-box p-4 h-100" style="border-left-color: #198754;">
+                        <div class="stat-box p-4 h-100" style="border-left-color: #08a75d;">
                             <h1 class="display-4 fw-bold text-success mb-0" th:text="${playerProgress.gameProgressesDTO != null ? playerProgress.gameProgressesDTO.size() : 0}">0</h1>
-                            <p class="text-uppercase text-muted small fw-bold spacing-2">Partite Totali</p>
+                            <p class="text-uppercase text-muted small fw-bold spacing-2" th:text="#{tot_matches}"></p>
                         </div>
                     </div>
                         <div class="col-md-4">
                             <div class="stat-box p-4 h-100 border-warning" style="border-left-color: #ffc107;">
                                 <h1 class="display-4 fw-bold text-warning mb-0" th:text="${playerProgress.gameProgressesDTO != null ? playerProgress.gameProgressesDTO.?[isWon == true].size() : 0}">0</h1>
-                                <p class="text-uppercase text-muted small fw-bold spacing-2">Vittorie</p>
+                                <p class="text-uppercase text-muted small fw-bold spacing-2" th:text="#{wins}"></p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div id="view-history" class="view-section d-none">
-                    <h4 class="border-bottom border-secondary pb-2 mb-3">Ultime Partite</h4>
+                    <h4 class="border-bottom border-secondary pb-2 mb-3" th:text="#{last_matches}"></h4>
                     <div class="table-responsive">
                         <table class="table table-dark table-hover align-middle" th:if="${playerProgress != null}">
-                            <thead><tr><th>Classe</th><th>Modalità</th><th>Esito</th></tr></thead>
+                            <thead><tr><th th:text="#{last_matches}">Classe</th><th th:text="#{mod}"></th><th th:text="#{res}"></th></tr></thead>
                             <tbody>
                                 <tr th:each="game : ${playerProgress.gameProgressesDTO}">
                                     <td th:text="${game.classUT}">Class</td>
@@ -263,13 +261,13 @@
                                     <td>
                                         <span class="badge rounded-pill" 
                                               th:classappend="${game.isWon} ? 'text-bg-success' : 'text-bg-danger'"
-                                              th:text="${game.isWon} ? 'VITTORIA' : 'SCONFITTA'"></span>
+                                              th:text="${game.isWon} ? #{victory} : #{defeat}"></span>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div th:if="${playerProgress == null}" class="text-center text-muted">Nessuno storico disponibile.</div>
+                    <div th:if="${playerProgress == null}" class="text-center text-muted" th:text="#{no_history}">.</div>
                 </div>
 
                 <div id="view-achievements" class="view-section d-none">    
@@ -278,7 +276,7 @@
                         
                         <div class="text-center">
                             <h4 class="mb-0 fw-semibold lh-1" th:text="${userCurrentExperience}">0</h4>
-                            <p class="mb-0 fs-5 text-muted">Punti Totali</p>
+                            <p class="mb-0 fs-5 text-muted" th:text="#{tot_points}"></p>
                         </div>
                         
                         <div class="progress_container" 
@@ -297,12 +295,12 @@
                         <div class="text-center">
                             <h4 class="mb-0 fw-semibold lh-1" 
                                 th:text="${userCurrentExperience != null ? (expPerLevel - (userCurrentExperience % expPerLevel)) : 100}">100</h4>
-                            <p class="mb-0 fs-5 text-muted">XP al Livello</p>
+                            <p class="mb-0 fs-5 text-muted" th:text="#{xp_level}"></p>
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-2 mb-3">
-                        <h5 class="mb-0">Achievements ottenuti</h5>
+                        <h5 class="mb-0" th:text="#{achieve_obt}"></h5>
                     </div>
 
                     <div class="row row-cols-1 row-cols-md-2 g-3" th:if="${playerProgress != null}">
@@ -312,7 +310,7 @@
                                 <i class="bi bi-trophy-fill text-warning fs-2 me-3"></i>
                                 <div>
                                     <h6 class="mb-0 text-light" th:text="${ach}">Nome Achievement</h6>
-                                    <small class="text-success">Sbloccato</small>
+                                    <small class="text-success" th:text="#{unlocked}"></small>
                                 </div>
                             </div>
                         </div>
@@ -320,17 +318,17 @@
                     
                     <div th:if="${playerProgress == null or playerProgress.globalAchievements == null or playerProgress.globalAchievements.isEmpty()}" class="text-center text-muted mt-5">
                         <i class="bi bi-lock-fill fs-1 opacity-50"></i>
-                        <p class="mt-2 fw-semibold">Nessun achievement sbloccato</p>
+                        <p class="mt-2 fw-semibold" th:text="#{no_achieve}"></p>
                     </div>
                 </div>
 
 <div id="view-social" class="view-section d-none">
                     <div class="d-flex justify-content-between mb-3">
                         <div class="btn-group">
-                            <button class="btn btn-outline-light active" id="btn-show-followers" onclick="showSocialTab('followers')">Followers</button>
-                            <button class="btn btn-outline-light" id="btn-show-following" onclick="showSocialTab('following')">Following</button>
+                            <button class="btn btn-outline-light active" id="btn-show-followers" onclick="showSocialTab('followers')" th:text="#{followerss}"></button>
+                            <button class="btn btn-outline-light" id="btn-show-following" onclick="showSocialTab('following')" th:text="#{following}"></button>
                         </div>
-                        <a href="/SearchFriend" class="btn btn-primary"><i class="bi bi-person-plus"></i> Cerca</a>
+                        <a href="/SearchFriend" class="btn btn-primary"><i class="bi bi-person-plus" th:text="#{search}"></i></a>
                     </div>
                     
                     <div id="followers_block" class="row g-3">
@@ -348,10 +346,10 @@
                                     <small class="text-muted" th:text="'@' + ${u['nickname']}">@nick</small>
                                 </div>
                                 
-                                <a th:href="@{'/friend/' + ${u['userId']}}" class="btn btn-sm btn-outline-primary ms-auto">Vedi</a>
+                                <a th:href="@{'/friend/' + ${u['userId']}}" class="btn btn-sm btn-outline-primary ms-auto" th:text="#{view}"></a>
                             </div>
                         </div>
-                        <div th:if="${followersList == null or followersList.isEmpty()}" class="col-12 text-center text-muted">Nessun follower.</div>
+                        <div th:if="${followersList == null or followersList.isEmpty()}" class="col-12 text-center text-muted" th:text="#{no_follower}"></div>
                     </div>
 
                     <div id="following_block" class="row g-3 d-none">
@@ -370,10 +368,10 @@
                                     <small class="text-muted" th:text="'@' + ${u['nickname']}">@nick</small>
                                 </div>
                                 
-                                <a th:href="@{'/friend/' + ${u['userId']}}" class="btn btn-sm btn-outline-primary ms-auto">Vedi</a>
+                                <a th:href="@{'/friend/' + ${u['userId']}}" class="btn btn-sm btn-outline-primary ms-auto" th:text="#{view}"></a>
                             </div>
                         </div>
-                        <div th:if="${followingList == null or followingList.isEmpty()}" class="col-12 text-center text-muted">Non segui nessuno.</div>
+                        <div th:if="${followingList == null or followingList.isEmpty()}" class="col-12 text-center text-muted" th:text="#{no_following}"></div>
                     </div>
                 </div>
 
@@ -387,6 +385,9 @@
 <div th:replace="fragments/footer :: footer"></div>
 
 <span class="d-none" id="userProfileID" th:text="${userInfo != null ? userInfo.userProfile.id : ''}"></span>
+
+<span id="viewText" style="display: none;" th:text="#{view}"></span>
+<span id="serchNotFoundText" style="display: none;" th:text="#{search_not_found}"></span>
 
 <script>
     // 1. GESTIONE SELETTORE VISTA (Menu a tendina)
@@ -461,10 +462,13 @@
                     const container = document.getElementById(containerId);
                     container.innerHTML = "";
                     if(!users || users.length === 0) {
-                        container.innerHTML = "<p class='text-muted text-center w-100'>Nessun utente trovato.</p>";
+
+                        const searchNotFound = $("#serchNotFoundText").text();
+                        container.innerHTML = `<p class='text-muted text-center w-100'>${searchNotFound}</p>`;
                         return;
                     }
                     users.forEach(u => {
+                        const viewText = $("#viewText").text();
                         const imgPath = u.profilePicturePath ? '/t5/images/profileImages/' + u.profilePicturePath : '/t5/images/default.png';
                         container.innerHTML += `
                             <div class="col-md-6">
@@ -474,7 +478,7 @@
                                         <h6 class="mb-0 text-light">${u.name} ${u.surname}</h6>
                                         <small class="text-muted">@${u.nickname}</small>
                                     </div>
-                                    <a href="/friend/${u.userId}" class="btn btn-sm btn-outline-primary ms-auto">Vedi</a>
+                                    <a href="/friend/${u.userId}" class="btn btn-sm btn-outline-primary ms-auto">${viewText}</a>
                                 </div>
                             </div>
                         `;

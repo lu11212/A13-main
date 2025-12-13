@@ -23,16 +23,16 @@
     
     <div class="row mb-3 mt-4">
         <div class="col-12">
-            <a href="/SearchFriend" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-2"></i>Torna alla Ricerca</a>
+            <a href="/SearchFriend" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-2" th:text="#{ritorna_ricerca}"></i></a>
         </div>
     </div>
 
     <div class="row justify-content-center" th:if="${user == null}">
         <div class="col-lg-8 text-center">
             <div class="alert alert-warning">
-                <h4><i class="fas fa-exclamation-triangle"></i> Utente non trovato</h4>
-                <p>Impossibile visualizzare il profilo richiesto.</p>
-                <a href="/SearchFriend" class="btn btn-primary mt-2">Cerca qualcun altro</a>
+                <h4><i class="fas fa-exclamation-triangle" th:text="#{user_not_found}"></i></h4>
+                <p th:text="#{profile_not_found}"></p>
+                <a href="/SearchFriend" class="btn btn-primary mt-2" th:text="#{find_others}"></a>
             </div>
         </div>
     </div>
@@ -60,9 +60,9 @@
                         <button id="followButton" 
                                 class="btn px-5 fw-bold rounded-pill shadow-sm"
                                 th:classappend="${amIFollowing} ? 'btn-danger' : 'btn-primary'"
-                                th:text="${amIFollowing} ? 'Unfollow' : 'Follow'"
-                                th:attr="data-friend-id=${user.id}">
-                            Follow
+                                th:text="${amIFollowing} ? #{unfollow} : #{follow}"
+                                th:attr="data-friend-id=${user.userProfile.id}">
+                        
                         </button>
                     </div>
                 </div>
@@ -73,31 +73,31 @@
     <div class="row justify-content-center mt-5" th:if="${user != null}">
         <div class="col-lg-10">
             <div class="bg-dark rounded-4 p-4 shadow border border-secondary border-opacity-25">
-                <h4 class="border-bottom border-secondary pb-2 mb-4 text-center">Statistiche Giocatore</h4>
+                <h4 class="border-bottom border-secondary pb-2 mb-4 text-center" th:text="#{player_stats}"></h4>
                 
                 <div th:if="${playerProgress != null}" class="row g-4 text-center">
                     <div class="col-md-4">
                         <div class="stat-box p-4 h-100">
                             <h1 class="display-4 fw-bold text-primary mb-0" th:text="${playerProgress.experiencePoints}">0</h1>
-                            <p class="text-uppercase text-muted small fw-bold spacing-2">XP Totali</p>
+                            <p class="text-uppercase text-muted small fw-bold spacing-2" th:text="#{player_xp}"></p>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="stat-box p-4 h-100" style="border-left-color: #198754;">
                             <h1 class="display-4 fw-bold text-success mb-0" th:text="${playerProgress.gameProgressesDTO != null ? playerProgress.gameProgressesDTO.size() : 0}">0</h1>
-                            <p class="text-uppercase text-muted small fw-bold spacing-2">Partite</p>
+                            <p class="text-uppercase text-muted small fw-bold spacing-2" th:text="#{player_matches}"></p>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="stat-box p-4 h-100 border-warning" style="border-left-color: #ffc107;">
                             <h1 class="display-4 fw-bold text-warning mb-0" th:text="${playerProgress.gameProgressesDTO != null ? playerProgress.gameProgressesDTO.?[isWon == true].size() : 0}">0</h1>
-                            <p class="text-uppercase text-muted small fw-bold spacing-2">Vittorie</p>
+                            <p class="text-uppercase text-muted small fw-bold spacing-2" th:text="#{player_wins}"></p>
                         </div>
                     </div>
                 </div>
                 
                 <div th:if="${playerProgress == null}" class="text-center text-muted py-3">
-                    <i class="fas fa-chart-bar me-2 opacity-50"></i>Statistiche non ancora disponibili.
+                    <i class="fas fa-chart-bar me-2 opacity-50" th:text="#{stats_not_found}"></i>
                 </div>
             </div>
         </div>
@@ -107,6 +107,8 @@
 <div th:replace="fragments/footer :: footer"></div>
 
 <span id="userProfileID" class="d-none" th:text="${userInfo != null ? userInfo.userProfile.id : ''}"></span>
+<span id="followText" style="display: none;" th:text="#{follow}"></span>
+<span id="unfollowText" style="display: none;" th:text="#{unfollow}"></span>
 
 <script src="/t5/js/friend_profile.js"></script>
 

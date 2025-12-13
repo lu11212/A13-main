@@ -86,11 +86,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Aggiorna lo stile in base al nuovo stato
                 if (isFollowing === true) {
-                    this.textContent = 'Unfollow';
+                    this.textContent = $("#unfollowText").text();
                     this.classList.remove('btn-primary');
                     this.classList.add('btn-danger');
                 } else {
-                    this.textContent = 'Follow';
+                    this.textContent = $("#followText").text();
                     this.classList.remove('btn-danger');
                     this.classList.add('btn-primary');
                 }

@@ -5,6 +5,9 @@ import com.example.db_setup.model.UserProfile;
 import com.example.db_setup.service.PlayerService;
 import com.example.db_setup.service.UserSocialService;
 import com.example.db_setup.service.exception.UserNotFoundException;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -15,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/profile")
 public class UserSocialController {
@@ -146,6 +150,7 @@ public class UserSocialController {
 
     @GetMapping("/following")
     public ResponseEntity<?> getFollowing(@RequestParam String userId) {
+        log.info("Ricevuta richiesta di getFollowing per userId: " + userId);
         try {
             return ResponseEntity.ok(userSocialService.getFollowing(userId));
         } catch (Exception e) {
@@ -165,10 +170,12 @@ public class UserSocialController {
 
     @PostMapping("/toggle_follow")
     public ResponseEntity<?> toggleFollow(@RequestParam String followerId, @RequestParam String followingId) {
+        log.info("Ricevuta richiesta di toggleFollow: followerId=" + followerId + ", followingId=" + followingId);
         try {
             boolean FollowState = userSocialService.toggleFollow(followerId, followingId);
             return ResponseEntity.ok(FollowState);
         } catch (Exception e) {
+            log.error("Errore durante il toggleFollow", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Errore");
         }
     }
@@ -181,7 +188,7 @@ public class UserSocialController {
             @RequestParam("email") String email,
             @RequestParam("bio") String bio,
             @RequestParam("profilePicturePath") String profilePicturePath,
-            @RequestParam(value = "nickname", required = false, defaultValue = "default_nickname") String nickname) {
+            @RequestParam(value = "nickname", required = false) String nickname) {
         
         System.out.println("--- T23: Ricevuta richiesta di update per " + email + " ---");
         System.out.println("Dati: Bio='" + bio + "', Nick='" + nickname + "', Img='" + profilePicturePath + "'");
