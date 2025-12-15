@@ -57,10 +57,7 @@ public class UserProfileController {
         }
     }
 
-    // ==========================================
-    // ==== VISUALIZZAZIONE PROFILO =============
-    // ==========================================
-// VISUALIZZAZIONE PROFILO (Con dati per il Cerchio Livello)
+    // visualizzazione profilo personale
     @GetMapping("/profile")
     public String profilePagePersonal(Model model, @CookieValue(name = "jwt", required = false) String jwt) {
         if (jwt == null) jwt = JwtRequestContext.getJwtToken();
@@ -77,7 +74,7 @@ public class UserProfileController {
                 model.addAttribute("isFriendProfile", false);
                 model.addAttribute("stockImages", getProfilePictures());
 
-                // RECUPERO DATI DI GIOCO (Uguale a Achievement.html)
+                // recupero statistiche di gioco
                 try {
                     PlayerProgressDTO progress = (PlayerProgressDTO) serviceManager.handleRequest("T23", "getPlayerProgressAgainstAllOpponent", user.getId());
                     model.addAttribute("playerProgress", progress);
@@ -89,7 +86,7 @@ public class UserProfileController {
                         model.addAttribute("userCurrentExperience", 0);
                     }
                     
-                    // Passiamo la configurazione di gioco (Livelli, XP max, ecc.)
+                    // configurazioni gamification
                     if (gameConfigData != null) {
                         model.addAttribute("startingLevel", gameConfigData.getStartingLevel());
                         model.addAttribute("expPerLevel", gameConfigData.getExpPerLevel());
@@ -113,9 +110,7 @@ public class UserProfileController {
         return profilePage.handlePageRequest();
     }
 
-    // ==========================================
-    // ==== SALVATAGGIO PROFILO (Stock) =========
-    // ==========================================
+    // aggiornamento profilo personale
     @PostMapping("/profile")
     public String updateProfile(
             @RequestParam(value = "bio", required = false) String bio,
@@ -166,10 +161,7 @@ public class UserProfileController {
         return "redirect:/profile";
     }
 
-    // ==========================================
-    // ==== METODI HELPER (ORA INCLUSI!) ========
-    // ==========================================
-
+    // metodo di utilità per estrarre email da JWT
     private String extractEmailFromJwt(String jwt) {
         try {
             if (jwt == null || jwt.isEmpty()) return null;
@@ -199,13 +191,9 @@ public class UserProfileController {
         return images;
     }
 
-    // ==========================================
-    // ==== ALTRI ENDPOINT (Social, Team...) ====
-    // ==========================================
 
-// --- SOCIAL (Modificati per bypassare il Gateway) ---
     
-    // Era: @GetMapping("/followers")
+    // endpoint modificati per followers/following
     @GetMapping("/profile/followers") 
     public ResponseEntity<?> getFollowers(@RequestParam String userId) {
         try {
@@ -215,7 +203,6 @@ public class UserProfileController {
         }
     }
 
-    // Era: @GetMapping("/following")
     @GetMapping("/profile/following")
     public ResponseEntity<?> getFollowing(@RequestParam String userId) {
         try {
@@ -225,9 +212,7 @@ public class UserProfileController {
         }
     }
 
-// ==========================================
-    // ==== API DI RICERCA (Versione Robusta) ===
-    // ==========================================
+    // ricerca utenti
     @GetMapping("/profile/search_api")
     @ResponseBody
     public ResponseEntity<?> searchUserProfiles(
@@ -241,7 +226,7 @@ public class UserProfileController {
 
             Object result = serviceManager.handleRequest("T23", "searchUserProfiles", jwt, searchTerm, page, size);
             
-            // FIX: Se è null, restituisci una mappa vuota per evitare crash JS
+            // Restituisci JSON vuoto se il risultato è null
             if (result == null) {
                 return ResponseEntity.ok(Map.of("content", List.of(), "totalPages", 0));
             }
@@ -278,7 +263,7 @@ public class UserProfileController {
         if (jwt == null) jwt = JwtRequestContext.getJwtToken();
         PageBuilder profile = new PageBuilder(serviceManager, "friend_profile", model, jwt);
         
-        // 1. Carica TE STESSO
+        // carica me stesso
         String myEmail = extractEmailFromJwt(jwt);
         User myself = null;
         if (myEmail != null) {
@@ -288,14 +273,14 @@ public class UserProfileController {
             } catch (Exception e) {}
         }
 
-        // 2. Carica AMICO
+        // carica amico
         try {
             User friend = (User) serviceManager.handleRequest("T23", "GetUser", String.valueOf(playerID));
             logger.info("Friend loaded: {}", friend);
             if (friend != null) {
                 model.addAttribute("user", friend);
                 
-                // Statistiche (Gestione NULL robusta)
+                // Statistiche
                 try {
                      PlayerProgressDTO progress = (PlayerProgressDTO) serviceManager.handleRequest("T23", "getPlayerProgressAgainstAllOpponent", friend.getId());
                      // Se progress è null, creiamo un oggetto vuoto o gestiamo nel template
@@ -304,7 +289,7 @@ public class UserProfileController {
                      model.addAttribute("playerProgress", null); // Assicura che sia null esplicito
                 }
 
-                // Social e Calcolo "amIFollowing"
+                // Social e Calcolo amIFollowing
                 boolean amIFollowing = false;
                 logger.info("Checking if myself follows friend...");
                 try {
@@ -316,7 +301,7 @@ public class UserProfileController {
                         String myIdStr = String.valueOf(myself.getId());
                         for(Map<String, Object> f : followers) {
                             Object fId = f.get("userId");
-                            // Gestione sicura del tipo (Integer o String)
+                            // Gestione sicura del tipo 
                             logger.info("Checking follower ID: {}, {}, {}, isEqual: {}", fId, String.valueOf(fId), myIdStr, fId != null ? String.valueOf(fId).equals(myIdStr) : "fId is null");
                             if (fId != null && String.valueOf(fId).equals(myIdStr)) {
                                 amIFollowing = true;

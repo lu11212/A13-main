@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-// Estrai utente da token jwt (Utile se serve ID client-side)
+// funzione per ottenere l'ID utente dal JWT
 function getAuthUserId(jwt) {
     try {
         const base64Url = jwt.split('.')[1];
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.addEventListener('DOMContentLoaded', function() {
     
-    // --- GESTIONE BOTTONE FOLLOW ---
+    //gestione bottone follow/unfollow
     const followButton = document.getElementById('followButton');
     
     if (followButton) {
@@ -55,13 +55,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Recupera gli ID necessari
             const friendUserId = this.getAttribute('data-friend-id');
-            // ID utente loggato (passato da thymeleaf in uno span nascosto #userProfileID)
+
             const myIdSpan = document.getElementById('userProfileID');
             const myId = myIdSpan ? myIdSpan.textContent : "0";
 
             console.log('Toggle Follow -> MyID:', myId, ' FriendID:', friendUserId);
 
-            // Creazione Form Data
+            // creazione del form data
             const formData = new URLSearchParams();
             formData.append("followerId", myId);
             formData.append("followingId", friendUserId);
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                 
-                // Il server restituisce TRUE (ora segui) o FALSE (non segui più)
+                // true se ora si segue, false altrimenti
                 const isFollowing = await response.json();
 
                 // Riabilita bottone
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- GESTIONE RICERCA NEI TAB (Se presente) ---
+    // Funzione per gestire la ricerca nei tab degli amici
     function setupTabSearch() {
         const searchInputs = document.querySelectorAll('.tab-search');
         searchInputs.forEach(searchInput => {
@@ -155,7 +155,6 @@ document.addEventListener('DOMContentLoaded', function() {
         emailElement.innerHTML = highlightMatch(emailElement.textContent, searchTerm);
     }
 
-    // Stili CSS dinamici per l'highlight
     const style = document.createElement('style');
     style.textContent = `
         .highlight {

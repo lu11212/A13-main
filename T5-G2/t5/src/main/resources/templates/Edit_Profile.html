@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const saveButton = document.getElementById("save-button");
     const userData = document.getElementById("user-data");
     
-    // Recupero email (ID corretto user-email)
+    // Recupero email utente
     const userEmailElement = document.getElementById("user-email"); 
     const userEmail = userEmailElement ? userEmailElement.textContent.trim() : "";
 
@@ -96,9 +96,9 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             try {
-                    // MODIFICA QUI: Puntiamo a "/profile" in POST
+                    // endpoint di aggiornamento profilo
                     const response = await fetch("/profile", {
-                        method: "POST", // Il POST lo distingue dalla visualizzazione
+                        method: "POST", 
                         headers: headers,
                         body: formData.toString(),
                     });

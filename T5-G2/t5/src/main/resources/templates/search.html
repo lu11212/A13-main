@@ -85,7 +85,7 @@
 
     $("#init_alert").show();
 
-// 1. Aggiorna la funzione di successo della ricerca
+// Funzione di ricerca utente
     function searchUserProfiles(searchTerm, page, size) {
         $.ajax({
             url: "/profile/search_api",
@@ -109,7 +109,7 @@
         });
     }
 
-    // 2. Aggiornamento Risultati
+    // Aggiorna i risultati della ricerca
     function updateResults(data) {
         let resultsContainer = $("#followers_block");
         resultsContainer.empty();
@@ -122,14 +122,14 @@
         }
 
         data.content.forEach(user => {
-            // FIX IMMAGINE: Se manca, usa il default nel percorso corretto
+            // inserimento immagine default se null
             let pic = user.profilePicturePath ? user.profilePicturePath : 'default.png';
             let imgUrl = '/t5/images/profileImages/' + pic;
 
-            // FIX NOME: Fallback se null
+            // Nome completo
             let fullName = (user.name || '') + " " + (user.surname || '');
             
-            // FIX LINK: T23 restituisce "userId" nel JSON
+            // Link al profilo
             let friendLink = '/friend/' + (user.userId || user.id || 0);
 
             let view = $("#viexText").text();
@@ -155,7 +155,7 @@
         });
     }
 
-// 2. Aggiorna la funzione di paginazione (Fix per l'errore undefined)
+// agg\iorna la paginazione
     function updatePagination(data) {
         let paginationContainer = $(".pagination");
         paginationContainer.empty();
@@ -173,8 +173,7 @@
             </li>`
         );
 
-        // --- Numeri ---
-        // Mostriamo un range limitato per evitare 1000 bottoni
+        // pagine numerate
         let startPage = Math.max(0, currentPage - 2);
         let endPage = Math.min(totalPages - 1, currentPage + 2);
 
@@ -189,7 +188,7 @@
             );
         }
 
-        // --- Successivo ---
+        // successivo
         let nextDisabled = currentPage === totalPages - 1 ? 'disabled' : '';
         paginationContainer.append(
             `<li class="page-item ${nextDisabled}">
@@ -198,7 +197,7 @@
         );
     }
 
-    // 4. Input Handler (con ritardo per non spammare il server)
+    // imput di ricerca con ritardo
     $("#friend-search-input").on("input", function() {
         let searchTerm = $(this).val();
         clearTimeout(timeoutId);
@@ -216,7 +215,7 @@
         }
     });
 
-    // 5. Click Paginazione
+    // Gestione click paginazione
     $(document).on("click", ".page-link", function(e) {
         e.preventDefault();
         let page = $(this).data("page");

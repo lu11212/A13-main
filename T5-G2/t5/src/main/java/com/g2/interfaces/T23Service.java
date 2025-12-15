@@ -61,7 +61,7 @@ public class T23Service extends BaseService {
         registerPlayerStatusActions();
     }
 
-    // --- 1. METODO CHE DAVA ERRORE (Ora incluso) ---
+    // metodo per l'autenticazione
     private JwtValidationResponseDTO getAuthenticated(String jwt) {
         final String endpoint = "/auth/validateToken";
         if (jwt == null || jwt.isEmpty()) {
@@ -72,7 +72,7 @@ public class T23Service extends BaseService {
         return callRestPost(endpoint, formData, null, JwtValidationResponseDTO.class);
     }
 
-    // --- REGISTRAZIONE AZIONI ---
+    // registrazione azioni relative al profilo utente
     private void registerUserProfileActions() {
         // Registrazione UpdateProfile con 5 parametri (JWT incluso)
         registerAction("UpdateProfile", new ServiceActionDefinition(
@@ -136,22 +136,19 @@ private void registerGetUserActions() {
                 List.class
         ));
 
-        // --- VERSIONE STABILE (1 Parametro: solo Email) ---
-        // NON LO TOCCHIAMO, così il profilo non si rompe.
         registerAction("GetUserByEmail", new ServiceActionDefinition(
                 params -> getUserByEmail((String) params[0]),
                 String.class
         ));
 
-        // --- NUOVA AZIONE: RICERCA (4 Parametri: JWT + Termine + Pagina + Dimensione) ---
-        // Aggiungiamo solo questa riga.
+        // ricerca profili utente con doppia autenticazione
         registerAction("searchUserProfiles", new ServiceActionDefinition(
                 params -> searchUserProfiles((String) params[0], (String) params[1], (Integer) params[2], (Integer) params[3]),
                 String.class, String.class, Integer.class, Integer.class
         ));
     }
 
-// --- METODO PRIVATO RICERCA (Con Doppia Autenticazione) ---
+    //metodo di ricerca profili utente con doppia autenticazione
     private Object searchUserProfiles(String jwt, String searchTerm, int page, int size) {
         final String endpoint = "/profile/searchUserProfiles";
         
@@ -167,10 +164,8 @@ private void registerGetUserActions() {
              if (jwt != null && !jwt.isEmpty()) {
                  String cleanJwt = jwt.trim();
                  
-                 // STRATEGIA 1: Header Standard
                  headers.set("Authorization", "Bearer " + cleanJwt);
                  
-                 // STRATEGIA 2: Cookie (Quella che piace a T23!)
                  headers.set("Cookie", "jwt=" + cleanJwt);
              }
              
@@ -217,7 +212,7 @@ private void registerGetUserActions() {
         ));
     }
 
-// --- METODO UPDATE PROFILE (STRATEGIA DOPPIA: HEADER + COOKIE) ---
+// metodo per l'aggiornamento del profilo utente con doppia autenticazione
     private Boolean updateProfile(String jwt, String email, String bio, String nickname, String imagePath) {
         final String endpoint = "/profile/updateProfile"; 
 
@@ -237,11 +232,8 @@ private void registerGetUserActions() {
                  // Rimuoviamo eventuali spazi extra
                  String cleanJwt = jwt.trim();
 
-                 // STRATEGIA 1: Header Standard (Authorization: Bearer ...)
                  headers.set("Authorization", "Bearer " + cleanJwt);
                  
-                 // STRATEGIA 2: Header Cookie (Cookie: jwt=...)
-                 // Molti filtri Spring Security leggono i cookie, non l'header Authorization
                  headers.set("Cookie", "jwt=" + cleanJwt);
                  
                  logger.info("T23Service: Token allegato alla richiesta verso T23 (Header + Cookie).");
@@ -259,7 +251,7 @@ private void registerGetUserActions() {
             return false;
         }
     }
-    // --- ALTRI METODI PRIVATI ---
+
     
     private User getUserByEmail(String userEmail) {
         final String endpoint = "/profile/user_by_email";
@@ -333,19 +325,19 @@ private void registerGetUserActions() {
         return callRestGET(endpoint, null, new ParameterizedTypeReference<List<User>>() {});
     }
 
-// --- METODO GET USER (Aggiornato) ---
+// metodo per ottenere un utente tramite ID
     private User getUser(String userId) {
         // NUOVO ENDPOINT (Quello che abbiamo appena creato in T23)
         final String endpoint = "/profile/user_by_id";
         Map<String, String> queryParams = Map.of("id", userId);
         
         try {
-            // Facciamo la chiamata e otteniamo il JSON grezzo
+            // chiamata per ottenere il JSON grezzo
             String jsonRaw = callRestGET(endpoint, queryParams, String.class);
             
             if (jsonRaw == null || jsonRaw.trim().isEmpty()) return null;
             
-            // Usiamo il Mapper per convertire il JSON in oggetto User
+            // conversione del JSON in User
             JsonNode root = mapper.readTree(jsonRaw);
             
             if (root.isArray()) {
@@ -426,7 +418,7 @@ private void registerGetUserActions() {
         return callRestPost(endpoint, map, null, String.class);
     }
 
-// Modifichiamo il tipo di ritorno da List<User> a List<Map<String, Object>>
+// metodo per ottenere la lista dei follower e dei following di un utente
     public List<Map<String, Object>> getFollowers(String userId) {
         final String endpoint = "/profile/followers";
         Map<String, String> queryParams = Map.of("userId", userId);
@@ -440,3 +432,4 @@ private void registerGetUserActions() {
         return callRestGET(endpoint, queryParams, new ParameterizedTypeReference<List<Map<String, Object>>>() {});
     }
 }
+

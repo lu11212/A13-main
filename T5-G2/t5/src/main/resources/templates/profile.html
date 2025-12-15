@@ -390,27 +390,25 @@
 <span id="serchNotFoundText" style="display: none;" th:text="#{search_not_found}"></span>
 
 <script>
-    // 1. GESTIONE SELETTORE VISTA (Menu a tendina)
+    // menu a tendina 
         function changeView(viewName) {
         // Nascondi tutte le sezioni
         document.querySelectorAll('.view-section').forEach(el => el.classList.add('d-none'));
         // Mostra quella selezionata
         document.getElementById('view-' + viewName).classList.remove('d-none');
 
-        // --- AGGIUNTA: ANIMAZIONE CERCHIO ---
-        // Se l'utente ha scelto "achievements", ricalcoliamo e animiamo il cerchio
+        // animazione cerchio livello
         if (viewName === 'achievements') {
             setTimeout(() => {
                 let progressContainer = document.querySelector('.progress_container');
                 if (progressContainer) {
-                    // Leggiamo il valore calcolato da Thymeleaf nell'attributo data-progress
-                    // Il calcolo (Exp % ExpPerLevel) / ExpPerLevel restituisce un numero tra 0.0 e 1.0
+
+
                     let progressStr = progressContainer.getAttribute('data-progress');
-                    // Eseguiamo il calcolo matematico contenuto nella stringa (es. "350 / 1000")
                     let progress = eval(progressStr); 
                     
                     let progressFill = document.querySelector(".progress_fill");
-                    // 314 è la circonferenza del cerchio (2 * pi * r dove r=50)
+                    
                     let offset = 314 * (1 - progress);
                     progressFill.style.strokeDashoffset = offset;
                 }
@@ -419,7 +417,7 @@
     }
     
 
-    // 2. GESTIONE MODALE EDIT (Apertura/Chiusura)
+    // gestione modale modifica profilo
     function toggleEditMode() {
         const overlay = document.getElementById('edit-overlay');
         overlay.style.display = (overlay.style.display === 'none' || overlay.style.display === '') ? 'block' : 'none';
@@ -427,7 +425,7 @@
         else document.body.style.overflow = 'auto'; // Riattiva scroll
     }
 
-    // 3. GESTIONE SELEZIONE IMMAGINE
+    // gestione selezione avatar
     function selectAvatar(imgElement) {
         document.querySelectorAll('.stock-avatar').forEach(el => el.classList.remove('selected'));
         imgElement.classList.add('selected');
@@ -435,7 +433,7 @@
         document.getElementById('selectedImageInput').value = filename;
     }
 
-    // 4. LOGICA SOCIAL (Ajax Followers/Following)
+    // gestione tab social
     function showSocialTab(type) {
         document.getElementById('btn-show-followers').classList.remove('active');
         document.getElementById('btn-show-following').classList.remove('active');
@@ -487,7 +485,7 @@
                 .catch(err => console.error("Err Social:", err));
         }
 
-// MODIFICA QUI: Aggiunto il prefisso /profile/
+// chiamate per caricare followers e following
         loadUsers("/profile/followers", "followers_block");
         loadUsers("/profile/following", "following_block");
     });
