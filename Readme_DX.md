@@ -18,29 +18,16 @@ A livello architetturale, l'aggiornamento ha richiesto:
 
 ### Modifiche ai Microservizi
 
-| Microservizio / Modulo            | Tipo di Modifica      | Note |
-|----------------------------------|---------------------|----------------------------------|
-| Achievement.html (T5)             | Eliminato           | Eliminazione pagina dedicata per insrimento Tab nella pagina profilo                                |
-| GameHistory.html (T5)             | Eliminato           | Eliminazione pagina dedicata per insrimento Tab nella pagina profilo                                 |
-| Leaderboard.html (T5)             | Eliminato           | Eliminazione pagina dedicata per insrimento Tab nella pagina profilo                                 |
-| Navbar.html (T5)                  | Modificato          | Rimozione pulsanti Achievement, Leaderboard, Games che reindirizzavano a pagine dedicate                                |
-| edit-profile.html (T5)            | Modificato          | Aggiunta di label per i campi da aggiornare, aggiunta input hidden per campo mail, aggiunta div per le notifiche per coerenza con js                                |
-| profile.html (T5)                 | Modificato          | Aggiunta del Tab per Achievement, GameHistory, Leaderboard, modifica endpoint per funzionalità social, modifica recupero paramtri per coerenza con le informazini da reperire                                  |
-| search.html (T5)                  | Modificato          | Aggiunta di metodi per autenticazione, modifica endopoint, modifica recupero paramtri per coerenza con le informazini da reperire, rimozione logica javascript superflua                                |
-| Achievement.css (T5)              | Aggiunto            | Aggiornamento stile grafico                                |
-| GameHistory.css (T5)              | Aggiunto            | Aggiornamento stile grafico                                |
-| profile-edit.css (T5)             | Modificato          | Aggiornamento stile grafico                                |
-| profile.css (T5)                  | Modificato          | Aggiornamento stile grafico                                |
-| Achievement.js (T5)               | Aggiunto            | Logica javascript associata al nuovo componente Achievement da visualizzare nel profilo, internazionalizzazione                                |
-| GameHistory.js (T5)               | Aggiunto            | Logica javascript associata al nuovo componente GameHisotry da visualizzare nel profilo, internazionalizzazione                                |
-| Leaderboard.js (T5)               | Modificato          | Logica javascript associata al nuovo componente Leaderboard da visualizzare nel profilo                                |
-| profile-edit.js (T5)              | Modificato          | Modifica dell'endopoint per funzioanlità update, modifica recupero paramtri per coerenza con le informazini da reperire, internazionalizzazione                                |
-| language.js (T5)              | Modificato          | internazionalizzazione                                |
-| T23Service.java (T5)              | Modificato          | Aggiunta/Aggiornamento dei metodi che richiamano funzionalità esposti dai vari microservizi per il recupero delle informazioni relativamente a Social, GameHistory, LeaderBoard, Achievement, Modifica Profilo                 |
-| UserProfileComponent.java (T5)    | Modificato          | Modifica della action riferita per recupero dei dati del profilo utente a partire dall'id del profilo.                               |
-| UserProfileController.java (T5)   | Modificato          | Aggiunta/Aggiornamento delle rotte per la gestione del recupero delle informazioni relativamente a Social, GameHistory, LeaderBoard, Achievement, Modifica Profilo.                                |
-| messages_it.properties (T5)              | Modificato          | etichette internazionalizzazione                                |
-| messages_en.properties (T5)              | Modificato          | etichette internazionalizzazione                                |
-| messages_es.properties (T5)              | Modificato          | etichette internazionalizzazione                                |
-| UserSocialController.java (T23)   | Modificato          | Aggiunta della rotta che gestisca il recupero delle informazioni utente a partire dall'id del profilo                                |
-| PlayerService.java (T23)          | Modificato          | Aggiunta metodo per il recupero delle informazioni utente a partire dall'id del profilo                             |
+| Microservizio | Tipo di Modifica | Note |
+| :--- | :--- | :--- |
+| **Backend T23**<br>*(UserSocialController.java)* | **Modifica & Aggiunta** | • **searchUserProfiles:** Restituisce una `Map` (JSON) invece di `Page`.<br>• **getUserByEmail:** Riscritto per restituire `ResponseEntity` (oggetto singolo) e gestire eccezioni ID nullo.<br>• **getUserById:** *Nuovo endpoint* per recupero utente tramite ID (necessario per risultati di ricerca).<br>• **toggleFollow:** *Nuovo endpoint* per gestione Follow/Unfollow con log dettagliati.<br>• **editProfile:** *Nuovo endpoint* per modifica Bio/Nick/Avatar con gestione errori DB. |
+| **Backend T23**<br>*(UserProfileRepository.java)* | **Modifica** | • **searchByNameSurnameEmailOrNickname:** Query ottimizzata per ricerca parziale, case-insensitive e multi-campo (4 colonne). Implementata paginazione (`Pageable`) per leggerezza. |
+| **Backend T23**<br>*(UserProfile.java)* | **Modifica** | • Rimossa inizializzazione statica "default_nickname".<br>• Implementata generazione dinamica nickname da email o timestamp per garantire unicità. |
+| **Backend T23**<br>*(docker-compose.yml)* | **Modifica** | • Esposizione porta **3306** (MySQL) per debug.<br>• Esposizione porta **8082** (App) per testing diretto senza Nginx. |
+| **Frontend T5**<br>*(UserProfileController.java)* | **Modifica & Aggiunta** | • **profilePagePersonal:** Recupero ID da email JWT, integrazione Gamification (XP/Barra circolare), gestione cookie.<br>• **updateProfile:** *Nuovo metodo* per POST modifica profilo, protezione nickname e Flash Attributes.<br>• **extractEmailFromJwt:** *Nuovo metodo* decodifica manuale token.<br>• **searchUserProfiles:** *Nuovo metodo* API AJAX per ricerca.<br>• **friendProfilePage:** Riscritto per caricare "myself" + "friend" e calcolo stato `amIFollowing`. |
+| **Frontend T5**<br>*(T23Service.java)* | **Modifica & Aggiunta** | • **getAuthenticated:** Gestione token nullo.<br>• **registerUserProfileActions:** Supporto 5 parametri (incluso JWT) per edit profilo.<br>• **searchUserProfiles:** *Nuovo metodo* con doppia autenticazione (Cookie+Header).<br>• **UpdateProfile:** Riscritto con doppia auth, try-catch e allineamento endpoint.<br>• **getFollowers/getFollowing:** Return type modificato in `Map` per flessibilità. |
+| **Frontend T5**<br>*(GuiController.java)* | **Modifica** | • Pulizia codice e import.<br>• Compattazione logica `editorPage` con controllo sessione e caricamento gioco precedente. |
+| **Frontend T5**<br>*(HTML Views)* | **Modifica & Aggiunta** | • **profile.html:** Refactoring visivo, Modale edit, ViewSelector (Tabs), import Achievements.<br>• **friend_profile.html:** *Nuovo file* per visualizzazione profili terzi con tasto Follow dinamico.<br>• **search.html:** Integrazione API `/profile/search_api`, debounce 500ms, fix paginazione.<br>• **Edit_Profile.html:** Logica JS interna per fetch POST e CSRF.<br>• **navbar.html:** Attivazione link al profilo utente. |
+| **Frontend T5**<br>*(Risorse Statiche)* | **Modifica** | • **friend_profile.js:** Correzione endpoint, recupero ID da HTML, disabilitazione bottone anti-spam.<br>• **messages_xx.properties:** Aggiunta stringhe i18n per Profilo, Ricerca e Social.<br>• **Dockerfile:** Base image aggiornata a `eclipse-temurin:17-jdk`. |
+| **Frontend T5**<br>*(docker-compose.yml)* | **Modifica** | • Esposizione porta servizio `app` verso l'esterno.<br>• Correzione sintassi esposizione Redis. |
+| **UI Gateway**<br>*(T23_route.conf)* | **Modifica** | • Aggiunto prefisso `/profile/` alle rotte Social per allineamento con le chiamate del frontend. |
