@@ -20,7 +20,9 @@ A livello architetturale, l'aggiornamento ha richiesto:
 
 | Microservizio / Modulo            | Tipo di Modifica      | Note |
 |----------------------------------|---------------------|----------------------------------|
-|
+| Achievement.html (T5)             | Eliminato           | Eliminazione pagina dedicata per insrimento Tab nella pagina profilo                                |
+| GameHistory.html (T5)             | Eliminato           | Eliminazione pagina dedicata per insrimento Tab nella pagina profilo                                 |
+| Leaderboard.html (T5)             | Eliminato           | Eliminazione pagina dedicata per insrimento Tab nella pagina profilo                                 |
 | Navbar.html (T5)                  | Modificato          | Rimozione pulsanti Achievement, Leaderboard, Games che reindirizzavano a pagine dedicate                                |
 | edit-profile.html (T5)            | Modificato          | Aggiunta di label per i campi da aggiornare, aggiunta input hidden per campo mail, aggiunta div per le notifiche per coerenza con js                                |
 | profile.html (T5)                 | Modificato          | Aggiunta del Tab per Achievement, GameHistory, Leaderboard, modifica endpoint per funzionalità social, modifica recupero paramtri per coerenza con le informazini da reperire                                  |
